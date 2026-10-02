@@ -1,0 +1,54 @@
+<resources>
+    <string name="common_back">返回</string>
+    <string name="common_cancel">取消</string>
+
+    <string name="chat_suggest_what_can_you_do">你能做什么？</string>
+    <string name="chat_suggest_what_can_you_do_prompt">你能帮我做些什么？举几个例子。</string>
+
+    <string name="login_title">登录</string>
+    <string name="login_code_title">输入验证码</string>
+    <string name="login_email_hint">邮箱</string>
+    <string name="login_code_hint">6 位验证码</string>
+    <string name="login_code_sent_to">验证码已发送至 %s</string>
+    <string name="login_code_spam_hint">没收到？看看垃圾邮件文件夹。</string>
+    <string name="login_continue">继续</string>
+    <string name="login_resend">重新发送</string>
+    <string name="login_resend_in">%d 秒后可重发</string>
+    <string name="login_signup_hint">还没有账号？登录即自动注册。</string>
+    <string name="login_email_invalid">邮箱格式不正确。</string>
+    <string name="login_code_invalid">验证码错误，请重试。</string>
+    <string name="login_code_expired">验证码已过期，请重新获取。</string>
+    <string name="login_too_many_attempts">尝试次数过多，请重新获取验证码。</string>
+    <string name="login_too_many_requests">请求过于频繁，请 %d 秒后再试。</string>
+    <string name="login_too_many_requests_minutes">请求过于频繁，请 %d 分钟后再试。</string>
+    <string name="login_generic_error">出了点问题，请稍后再试。</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_sign_in">登录</string>
+    <string name="settings_sign_out">退出登录</string>
+    <string name="settings_sign_out_confirm">在此设备上退出 Tono 登录？</string>
+    <string name="settings_account_signed_out">已登录</string>
+    <string name="settings_pro_active">Tono Pro 已开通</string>
+    <string name="settings_pro_upgrade">升级 Pro</string>
+    <string name="settings_manage_subscription">管理订阅</string>
+    <string name="settings_privacy">隐私政策</string>
+    <string name="settings_terms">服务条款</string>
+    <string name="settings_version">版本 %s</string>
+
+    <string name="paywall_title">升级 Pro</string>
+    <string name="paywall_subtitle">更多额度、全部模型、语音与图片，随时取消</string>
+    <string name="paywall_benefit_quota">更宽裕的 AI 额度</string>
+    <string name="paywall_benefit_models">全部高阶模型</string>
+    <string name="paywall_benefit_voice">语音输入</string>
+    <string name="paywall_benefit_search">联网搜索</string>
+    <string name="paywall_benefit_images">图片生成</string>
+    <string name="paywall_plan_annual">年付</string>
+    <string name="paywall_plan_monthly">月付</string>
+    <string name="paywall_savings">省 %d%%</string>
+    <string name="paywall_price_unavailable">暂时无法获取价格，请稍后再试。</string>
+    <string name="paywall_cta_subscribe">订阅 Pro</string>
+    <string name="paywall_cta_sign_in">登录后订阅</string>
+    <string name="paywall_refund_note">支持随时取消，14 天内可申请全额退款。</string>
+    <string name="paywall_already_pro">你已经是 Pro，感谢支持</string>
+    <string name="paywall_checkout_failed">暂时无法发起订阅，请稍后再试</string>
+</resources>

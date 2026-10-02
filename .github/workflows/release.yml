@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Prepare version
+        run: echo "VERSION_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release.jks
+          echo "ANDROID_KEYSTORE_PATH=$(pwd)/release.jks" >> $GITHUB_ENV
+
+      - name: Build
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :androidApp:assembleGithubRelease :androidApp:bundlePlayRelease --no-daemon
+
+      - name: Rename artifacts
+        run: |
+          cp androidApp/build/outputs/apk/github/release/androidApp-github-release.apk Tono-${VERSION_NAME}.apk
+          cp androidApp/build/outputs/bundle/playRelease/androidApp-play-release.aab Tono-${VERSION_NAME}-play.aab
+
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$VERSION_NAME" Tono-${VERSION_NAME}.apk \
+            --title "$VERSION_NAME" --generate-notes \
+            $([[ "$VERSION_NAME" == *-* ]] && echo --prerelease)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: play-aab
+          path: Tono-${{ env.VERSION_NAME }}-play.aab

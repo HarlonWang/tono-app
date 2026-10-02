@@ -1,0 +1,54 @@
+<resources>
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+
+    <string name="chat_suggest_what_can_you_do">What can you do?</string>
+    <string name="chat_suggest_what_can_you_do_prompt">What can you help me with? Give a few examples.</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="login_code_title">Enter the code</string>
+    <string name="login_email_hint">Email</string>
+    <string name="login_code_hint">6-digit code</string>
+    <string name="login_code_sent_to">We sent a code to %s</string>
+    <string name="login_code_spam_hint">Not there? Check your spam folder.</string>
+    <string name="login_continue">Continue</string>
+    <string name="login_resend">Resend code</string>
+    <string name="login_resend_in">Resend in %ds</string>
+    <string name="login_signup_hint">No account yet? Signing in creates one.</string>
+    <string name="login_email_invalid">That doesn\'t look like a valid email.</string>
+    <string name="login_code_invalid">Wrong code, please try again.</string>
+    <string name="login_code_expired">This code has expired. Request a new one.</string>
+    <string name="login_too_many_attempts">Too many attempts. Request a new code.</string>
+    <string name="login_too_many_requests">Too many requests. Try again in %ds.</string>
+    <string name="login_too_many_requests_minutes">Too many requests. Try again in %d min.</string>
+    <string name="login_generic_error">Something went wrong. Please try again.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_sign_in">Sign in</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_out_confirm">Sign out of Tono on this device?</string>
+    <string name="settings_account_signed_out">Signed in</string>
+    <string name="settings_pro_active">Tono Pro is active</string>
+    <string name="settings_pro_upgrade">Upgrade to Pro</string>
+    <string name="settings_manage_subscription">Manage subscription</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_terms">Terms of service</string>
+    <string name="settings_version">Version %s</string>
+
+    <string name="paywall_title">Upgrade to Pro</string>
+    <string name="paywall_subtitle">More credits, every model, voice and images. Cancel anytime.</string>
+    <string name="paywall_benefit_quota">A more generous AI allowance</string>
+    <string name="paywall_benefit_models">All advanced models</string>
+    <string name="paywall_benefit_voice">Voice input</string>
+    <string name="paywall_benefit_search">Web search</string>
+    <string name="paywall_benefit_images">Image generation</string>
+    <string name="paywall_plan_annual">Yearly</string>
+    <string name="paywall_plan_monthly">Monthly</string>
+    <string name="paywall_savings">Save %d%%</string>
+    <string name="paywall_price_unavailable">Prices are unavailable right now. Please try again later.</string>
+    <string name="paywall_cta_subscribe">Subscribe to Pro</string>
+    <string name="paywall_cta_sign_in">Sign in to subscribe</string>
+    <string name="paywall_refund_note">Cancel anytime. Full refund available within 14 days.</string>
+    <string name="paywall_already_pro">You\'re already a Pro member — thank you!</string>
+    <string name="paywall_checkout_failed">Couldn\'t start the subscription right now. Please try again.</string>
+</resources>
