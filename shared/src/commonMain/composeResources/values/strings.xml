@@ -44,7 +44,7 @@
     <string name="paywall_benefit_images">Image generation</string>
     <string name="paywall_plan_annual">Yearly</string>
     <string name="paywall_plan_monthly">Monthly</string>
-    <string name="paywall_savings">Save %d%%</string>
+    <string name="paywall_savings">Save %d%</string>
     <string name="paywall_price_unavailable">Prices are unavailable right now. Please try again later.</string>
     <string name="paywall_cta_subscribe">Subscribe to Pro</string>
     <string name="paywall_cta_sign_in">Sign in to subscribe</string>

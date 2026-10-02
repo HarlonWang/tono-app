@@ -44,7 +44,7 @@
     <string name="paywall_benefit_images">图片生成</string>
     <string name="paywall_plan_annual">年付</string>
     <string name="paywall_plan_monthly">月付</string>
-    <string name="paywall_savings">省 %d%%</string>
+    <string name="paywall_savings">省 %d%</string>
     <string name="paywall_price_unavailable">暂时无法获取价格，请稍后再试。</string>
     <string name="paywall_cta_subscribe">订阅 Pro</string>
     <string name="paywall_cta_sign_in">登录后订阅</string>
