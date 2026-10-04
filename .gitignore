@@ -21,3 +21,4 @@ node_modules/
 *.jks
 .superpowers/
 .claude/
+gradle/gradle-daemon-jvm.properties
