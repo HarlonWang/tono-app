@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch: # 只构建并上传 artifact，不建 Release：用于验证签名与构建链路
 
 permissions:
   contents: write
@@ -23,7 +24,12 @@ jobs:
           cache: gradle
 
       - name: Prepare version
-        run: echo "VERSION_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "VERSION_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "VERSION_NAME=0.0.1-ci" >> $GITHUB_ENV
+          fi
 
       - name: Decode keystore
         run: |
@@ -43,6 +49,7 @@ jobs:
           cp androidApp/build/outputs/bundle/playRelease/androidApp-play-release.aab Tono-${VERSION_NAME}-play.aab
 
       - name: GitHub Release
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -52,5 +59,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: play-aab
-          path: Tono-${{ env.VERSION_NAME }}-play.aab
+          name: release-artifacts
+          path: |
+            Tono-${{ env.VERSION_NAME }}.apk
+            Tono-${{ env.VERSION_NAME }}-play.aab
