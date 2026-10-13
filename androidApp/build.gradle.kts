@@ -82,7 +82,8 @@ android {
         buildConfig = true
     }
 
-    // 渠道只影响 BuildConfig.CHANNEL（UA 打标）；applicationId / 版本 / 签名完全一致，可互相覆盖升级
+    // 渠道只影响 BuildConfig.CHANNEL（UA 打标），applicationId / 版本一致。签名不一致：Play 开了应用签名，
+    // 用户装到的是 Google 托管密钥签的包，GitHub / F-Droid 包是上传密钥签的，跨渠道不能覆盖升级，须卸载重装
     flavorDimensions += "distribution"
     productFlavors {
         create("github") {
