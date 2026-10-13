@@ -25,4 +25,6 @@ Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。
 
 ## 发布
 
+**打 tag 前必须跑 `scripts/release-smoke.sh` 并看到 PASS。** 它先查线上服务端（模型目录 default 契约、订阅价格、app-config）与官网外链，再构建 play 渠道 release 包（R8 minify 与线上一致）装到设备上，验证启动、聊天输入框、设置页不崩。debug 包不混淆，R8 裁剪类问题只有 release 包能暴露。不发聊天消息、不耗额度。
+
 推 tag 触发 `.github/workflows/release.yml`：构建 github 渠道 APK 与 play 渠道 AAB，建 GitHub Release。需要 secrets：`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`（旧 Tono 的签名密钥，Play 更新必须同一把）。

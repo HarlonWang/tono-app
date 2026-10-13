@@ -7,3 +7,4 @@
 - chat 的 UI 与协议全在 chatbase-kmp，宿主只实现 `ChatHost`（`shared/.../chat/TonoChatHost.kt`）。要改 chat 行为先改库、发版、bump `libs.versions.toml`。
 - 刷新 token 只能走 `AuthManager.refreshAccessToken`，不要自己请求 `/auth/refresh`（并发刷新会烧掉服务端救活配额）。
 - 加载指示统一用 M3 Expressive 的 `LoadingIndicator`，不用 `CircularProgressIndicator`。
+- 打 tag 前必须跑 `scripts/release-smoke.sh` 并看到 PASS，FAIL 时禁止发版。
