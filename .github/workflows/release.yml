@@ -63,3 +63,27 @@ jobs:
           path: |
             Tono-${{ env.VERSION_NAME }}.apk
             Tono-${{ env.VERSION_NAME }}-play.aab
+
+      # 发布到 Google Play 正式轨道：上传 play 渠道 AAB 与本版发版说明（fastlane/metadata/android/*/changelogs/<versionCode>.txt），
+      # 上传即送审、过审自动上线。商品详情（文案 / 截图）由 play_listing.yml 同步，这里固定跳过。
+      # 密钥经 SUPPLY_JSON_KEY_DATA 环境变量传入（fastlane 原生识别），不落盘。预发布 tag（带 -）不上 Play。
+      # 数据安全、内容分级、登录详细信息等政策声明 Play 没有 API，变更时须先在 Play Console 手动改好再打 tag。
+      - uses: ruby/setup-ruby@v1
+        if: github.event_name == 'push' && !contains(github.ref_name, '-')
+        with:
+          ruby-version: '3.2'
+
+      - name: Publish to Google Play
+        if: github.event_name == 'push' && !contains(github.ref_name, '-')
+        env:
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          gem install fastlane --no-document
+          fastlane supply --package_name com.tono.android \
+            --aab Tono-${VERSION_NAME}-play.aab \
+            --track production \
+            --metadata_path fastlane/metadata/android \
+            --skip_upload_apk true \
+            --skip_upload_metadata true \
+            --skip_upload_images true \
+            --skip_upload_screenshots true

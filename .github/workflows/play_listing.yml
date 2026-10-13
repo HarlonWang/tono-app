@@ -1,0 +1,36 @@
+# Play 商品详情同步：fastlane/metadata 下的文案或截图变更 push 到 main 时自动同步到 Google Play，
+# 与发版（release.yml 的 Publish to Google Play）解耦。照搬 TrendingAI 同名工作流。
+#   - 仓库 fastlane/metadata 是商品详情的唯一事实源，文案勿在 Play 后台手改
+#   - changelogs 跳过：发版说明随 AAB 在发版工作流上传
+#   - sync_image_upload 必须开：否则 supply 每次全量重传图片，Play 会记成「更改截图 / 置顶大图」并连带提审
+#   - 商品详情变更同样要过审，审核期间旧详情继续展示
+name: Play Listing Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fastlane/metadata/android/**'
+  workflow_dispatch:
+
+jobs:
+  sync-listing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Sync listing to Google Play
+        env:
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          gem install fastlane --no-document
+          fastlane supply --package_name com.tono.android \
+            --metadata_path fastlane/metadata/android \
+            --skip_upload_apk true --skip_upload_aab true \
+            --skip_upload_changelogs true \
+            --sync_image_upload true
