@@ -35,7 +35,7 @@ fun gitDescribe(vararg extra: String): String? =
     }
 
 // 「MAJOR.MINOR.PATCH[-后缀]」→ MAJOR*10000 + MINOR*100 + PATCH，首个 tag 1.0.0 → 10000。
-// 旧 Tono（待办）最后一版 versionCode 为 12，Play 要求新包严格大于它，1.0.0 起步即满足；
+// 旧 Tono（待办）最后一版 versionCode 为 12，Play 要求新包严格大于它，0.5.0（versionCode 500）起步即满足；
 // 无 tag 时回落 13 只为本地安装能覆盖旧版，正式包必须在 tag 上构建。
 fun versionCodeFromTag(tag: String?): Int {
     val trimmed = tag?.trim().takeUnless { it.isNullOrEmpty() } ?: return 13
