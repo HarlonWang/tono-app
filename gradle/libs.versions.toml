@@ -23,6 +23,7 @@ composeIcons = "1.7.3"
 loginbase-kmp = "0.6.0"
 chatbase-kmp = "0.1.2"
 eventbase-kmp = "0.4.0"
+appsettings-kmp = "0.1.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -56,6 +57,7 @@ compose-icons-extended = { module = "org.jetbrains.compose.material:material-ico
 loginbase-kmp = { module = "wang.harlon:loginbase-kmp", version.ref = "loginbase-kmp" }
 chatbase-kmp = { module = "wang.harlon:chatbase-kmp", version.ref = "chatbase-kmp" }
 eventbase-kmp = { module = "wang.harlon:eventbase-kmp", version.ref = "eventbase-kmp" }
+appsettings-kmp = { module = "wang.harlon:appsettings-kmp", version.ref = "appsettings-kmp" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

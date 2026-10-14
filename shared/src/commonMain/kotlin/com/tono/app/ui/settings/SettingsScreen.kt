@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
@@ -37,7 +36,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.tono.app.auth.AuthState
 import com.tono.app.auth.globalAuthManager
 import com.tono.app.core.ProPaywall
-import com.tono.app.core.platform.getAppVersion
 import com.tono.app.core.platform.openInSystemBrowser
 import com.tono.app.data.local.globalSettingsManager
 import com.tono.app.data.remote.BillingRepository
@@ -46,24 +44,19 @@ import com.tono.app.resources.common_back
 import com.tono.app.resources.common_cancel
 import com.tono.app.resources.settings_account_signed_out
 import com.tono.app.resources.settings_manage_subscription
-import com.tono.app.resources.settings_privacy
 import com.tono.app.resources.settings_pro_active
 import com.tono.app.resources.settings_pro_upgrade
 import com.tono.app.resources.settings_sign_in
 import com.tono.app.resources.settings_sign_out
 import com.tono.app.resources.settings_sign_out_confirm
-import com.tono.app.resources.settings_terms
+import com.tono.app.resources.settings_about
 import com.tono.app.resources.settings_title
-import com.tono.app.resources.settings_version
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-const val PRIVACY_URL = "https://tonote.app/privacy"
-const val TERMS_URL = "https://tonote.app/terms"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onNavigateToAbout: () -> Unit) {
     val authState by globalAuthManager.authState.collectAsState()
     val email by globalSettingsManager.userEmail.collectAsState("")
     val isPro by globalSettingsManager.isPro.collectAsState(globalSettingsManager.currentIsPro())
@@ -106,9 +99,8 @@ fun SettingsScreen(onBack: () -> Unit) {
                     ProPaywall.open(ProPaywall.SOURCE_SETTINGS)
                 }
             }
-            SettingsRow(Icons.Filled.Description, stringResource(Res.string.settings_privacy)) { openInSystemBrowser(PRIVACY_URL) }
-            SettingsRow(Icons.Filled.Description, stringResource(Res.string.settings_terms)) { openInSystemBrowser(TERMS_URL) }
-            SettingsRow(Icons.Filled.Info, stringResource(Res.string.settings_version).replace("%s", getAppVersion()))
+            // 隐私、条款、版本号收进关于页（appsettings-kmp 的 AboutContent），这里只留入口
+            SettingsRow(Icons.Filled.Info, stringResource(Res.string.settings_about), onClick = onNavigateToAbout)
         }
     }
 

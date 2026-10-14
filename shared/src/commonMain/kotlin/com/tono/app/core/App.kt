@@ -35,7 +35,7 @@ import com.tono.app.resources.chat_suggest_what_can_you_do
 import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
-import com.tono.app.ui.common.WhatsNewHost
+import com.tono.app.ui.settings.AboutScreen
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
 import com.tono.app.ui.theme.TonoTheme
@@ -44,10 +44,16 @@ import org.jetbrains.compose.resources.stringResource
 import wang.harlon.chatbase.model.ChatModelsProvider
 import wang.harlon.chatbase.ui.ChatScreen
 import wang.harlon.chatbase.ui.ChatSuggestion
+import wang.harlon.appsettings.whatsnew.WhatsNewHost
+import wang.harlon.appsettings.whatsnew.rememberWhatsNewState
+import com.tono.app.data.local.globalSettings
+import com.tono.app.core.platform.getAppVersion
+import com.tono.app.core.platform.getSystemLanguage
 
 sealed interface Route
 data object Chat : Route
 data object Settings : Route
+data object About : Route
 data object ProSubscription : Route
 
 /** 栈底（Chat）永不弹出：转场期间连按返回会把栈弹空，NavDisplay 抛 backstack cannot be empty。 */
@@ -74,7 +80,13 @@ fun App() {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             LoginSheetHost()
             ProReconcileHost(userRepository)
-            WhatsNewHost()
+            // 升级后首启弹一次更新说明：状态与弹窗在 appsettings-kmp，这里只给版本、JSON 与展示语言
+            val whatsNew = rememberWhatsNewState(
+                settings = globalSettings,
+                currentVersion = remember { getAppVersion() },
+                load = { Res.readBytes("files/whatsnew.json").decodeToString() },
+            )
+            WhatsNewHost(whatsNew, language = getSystemLanguage())
             LaunchedEffect(Unit) {
                 ProPaywall.requests.collect {
                     if (backStack.lastOrNull() !is ProSubscription) backStack.add(ProSubscription)
@@ -113,7 +125,10 @@ fun App() {
                                 ),
                             )
                         }
-                        is Settings -> NavEntry(key) { SettingsScreen(onBack = { backStack.safePop() }) }
+                        is Settings -> NavEntry(key) {
+                            SettingsScreen(onBack = { backStack.safePop() }, onNavigateToAbout = { backStack.add(About) })
+                        }
+                        is About -> NavEntry(key) { AboutScreen(onBack = { backStack.safePop() }) }
                         is ProSubscription -> NavEntry(key) { SubscriptionScreen(onBack = { backStack.safePop() }) }
                     }
                 },
