@@ -13,7 +13,7 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     env:
-      # App 内置更新说明：Generate What's New 写它，GitHub Release 正文与 Play 发版说明读它
+      # App 内置更新说明（手写）：GitHub Release 正文与 Play 发版说明也从它生成
       WHATSNEW_PATH: shared/src/commonMain/composeResources/files/whatsnew.json
     steps:
       - uses: actions/checkout@v4
@@ -39,81 +39,30 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release.jks
           echo "ANDROID_KEYSTORE_PATH=$(pwd)/release.jks" >> $GITHUB_ENV
 
-      # 构建前生成面向用户的双语更新说明，覆盖仓库里的占位文件后随包打进去，App 升级后首启据此弹窗。
-      # 「自动 / 手动」由内容决定：仓库里 whatsnew.json 的 version 恰等于本次 tag 且 zh/en 至少一个非空
-      # → 手动模式，直接采用；否则调 AI 用上个正式版以来的 commit 生成。
-      # 生成失败不阻塞发布（保留占位 = 该版本不弹窗）。
-      - name: Generate What's New
+      # 更新说明只走手写：whatsnew.json 的 version 必须等于本次 tag 且有内容（流程见 CLAUDE.md「写更新说明」）。
+      # 正式版不符直接失败，免得发出不弹窗、Play 发版说明为空的版本；预发布只警告
+      - name: Check What's New
         if: github.event_name == 'push'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          # 只取正式版 tag 作基准（$ 锚定），预发布不当基准
-          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${VERSION_NAME}$" | head -n 1)
-          if [ -n "$PREVIOUS_TAG" ]; then
-            git log "$PREVIOUS_TAG"..HEAD --no-merges --oneline > commit_logs.txt
-          else
-            git log --no-merges --oneline -n 20 > commit_logs.txt
-          fi
-
           python3 - <<'EOF'
-          import json, os, urllib.request
-
+          import json, os
           version = os.environ["VERSION_NAME"]
-          target = os.environ["WHATSNEW_PATH"]
-          commits = open("commit_logs.txt").read().strip()
-
-          existing = {}
           try:
-              existing = json.load(open(target))
+              w = json.load(open(os.environ["WHATSNEW_PATH"]))
           except Exception as e:
-              print(f"⚠️ 读取 whatsnew.json 失败: {e}")
-          has_content = any(isinstance(x, str) and x.strip() for x in existing.get("zh", []) + existing.get("en", []))
-          if existing.get("version") == version and has_content:
-              print("✅ 使用本地手写的更新说明，跳过 AI")
+              w = {}
+              print(f"读取 whatsnew.json 失败: {e}")
+          has_content = any(isinstance(x, str) and x.strip() for x in w.get("zh", []) + w.get("en", []))
+          if w.get("version") == version and has_content:
+              print(f"✅ whatsnew.json 就绪: zh={len(w.get('zh', []))} en={len(w.get('en', []))}")
               raise SystemExit(0)
-          if has_content:
-              print(f"⚠️ 本地 whatsnew.json 有内容但版本({existing.get('version')})与 tag({version})不符，由 AI 覆盖")
-
-          api_key = os.environ.get("OPENAI_API_KEY", "")
-          if not commits or not api_key:
-              print("⚠️ 缺 commit 记录或 OPENAI_API_KEY，保留占位（本版不弹窗）")
-              raise SystemExit(0)
-
-          prompt = (
-              "请根据以下 git commit 记录，为一款 AI 聊天 App（Tono）生成面向普通用户的版本更新说明。\n"
-              "要求：\n"
-              "1. 过滤纯内部改动（构建、CI、打包、签名、依赖升级、重构、测试、文档），以及用户无直接感知的能力（统计、埋点、渠道识别、版本分发、监控、日志），只保留用户可感知的新功能、优化和修复。\n"
-              "2. 每条一句话，简洁明了，不要堆砌技术术语；中文 3-6 条，英文为对应翻译。若没有用户可感知的改动，输出一条「稳定性与体验优化」。\n"
-              "3. 严格输出 JSON 对象：{\"zh\": [\"...\"], \"en\": [\"...\"]}，不要输出任何其他内容。\n\n"
-              f"Commits:\n{commits}"
-          )
-          req = urllib.request.Request(
-              "https://api.openai.com/v1/chat/completions",
-              data=json.dumps({
-                  "model": "gpt-5.4",
-                  "messages": [{"role": "user", "content": prompt}],
-                  "response_format": {"type": "json_object"},
-              }).encode(),
-              headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
-          )
-          try:
-              with urllib.request.urlopen(req, timeout=60) as r:
-                  content = json.loads(json.loads(r.read())["choices"][0]["message"]["content"])
-              zh = [x.strip() for x in content.get("zh", []) if isinstance(x, str) and x.strip()]
-              en = [x.strip() for x in content.get("en", []) if isinstance(x, str) and x.strip()]
-              if not zh and not en:
-                  print("⚠️ 模型返回为空，保留占位")
-                  raise SystemExit(0)
-              # version 以 tag 为准，不信任模型输出
-              json.dump({"version": version, "zh": zh, "en": en}, open(target, "w"), ensure_ascii=False, indent=2)
-              print(f"✅ whatsnew.json 已生成: zh={len(zh)} en={len(en)}")
-          except SystemExit:
-              raise
-          except Exception as e:
-              print(f"⚠️ 生成失败，保留占位: {e}")
+          msg = f"whatsnew.json 未写本版内容（version={w.get('version')}，tag={version}）"
+          if "-" in version:
+              print(f"⚠️ {msg}，预发布继续，本版不弹窗")
+          else:
+              print(f"::error::{msg}")
+              raise SystemExit(1)
           EOF
-          cat "$WHATSNEW_PATH"
 
       - name: Build
         env:
@@ -127,7 +76,7 @@ jobs:
           cp androidApp/build/outputs/apk/github/release/androidApp-github-release.apk Tono-${VERSION_NAME}.apk
           cp androidApp/build/outputs/bundle/playRelease/androidApp-play-release.aab Tono-${VERSION_NAME}-play.aab
 
-      # Release 正文与 App 内更新说明同源；whatsnew 不可用时退回原始 commit 记录
+      # Release 正文与 App 内更新说明同源；预发布没写 whatsnew 时退回 GitHub 自动生成
       - name: GitHub Release
         if: github.event_name == 'push'
         env:
@@ -146,13 +95,11 @@ jobs:
                   lines += ["### ✨ 更新内容"] + [f"- {x}" for x in w["zh"]] + [""]
               if w.get("en"):
                   lines += ["### ✨ What's New"] + [f"- {x}" for x in w["en"]] + [""]
-          else:
-              commits = open("commit_logs.txt").read().strip() if os.path.exists("commit_logs.txt") else ""
-              lines += ["### 变更记录 (Changelog)", "", commits or "* No specific changes.", ""]
           open("release_notes.md", "w").write("\n".join(lines))
           EOF
+          if [ -s release_notes.md ]; then NOTES=(--notes-file release_notes.md); else NOTES=(--generate-notes); fi
           gh release create "$VERSION_NAME" Tono-${VERSION_NAME}.apk \
-            --title "$VERSION_NAME" --notes-file release_notes.md \
+            --title "$VERSION_NAME" "${NOTES[@]}" \
             $([[ "$VERSION_NAME" == *-* ]] && echo --prerelease)
 
       - uses: actions/upload-artifact@v4

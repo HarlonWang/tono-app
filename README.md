@@ -31,9 +31,6 @@ Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。
 
 ### 版本更新说明（whatsnew）
 
-App 升级后首启弹一次「新版本更新说明」，内容来自 `shared/src/commonMain/composeResources/files/whatsnew.json`（随包打进去）。同一份内容还拼成 GitHub Release 正文，并生成 Play 本版发版说明 `fastlane/metadata/android/<locale>/changelogs/<versionCode>.txt`（仓库里已有该文件则沿用）。两种模式由**内容**决定，没有额外开关：
+App 升级后首启弹一次「新版本更新说明」，内容来自 `shared/src/commonMain/composeResources/files/whatsnew.json`（随包打进去）。**只走手写，不用 AI 自动生成**：发版前把本版内容写进去，`version` 必须等于 tag。同一份内容还拼成 GitHub Release 正文，并生成 Play 本版发版说明 `fastlane/metadata/android/<locale>/changelogs/<versionCode>.txt`（仓库里已有该文件则沿用）。
 
-- **自动（默认）**：仓库里 `whatsnew.json` 保持占位（`version: 0.0.0`、zh/en 为空），直接推 tag。CI 用上个正式版以来的 commit 调 AI（gpt-5.4，需 secret `OPENAI_API_KEY`）生成并打包。生成失败或缺 key 不阻塞发布，只是本版不弹窗。
-- **手动**：`whatsnew.json` 的 `version` 恰等于本次 tag 且 zh/en 至少一个非空，CI 直接采用、跳过 AI。
-
-首次安装不弹；内置文件版本与 App 版本不一致（dev 构建、占位文件）也不弹。
+CI 的 Check What's New 步骤校验 `version` 与 tag 一致且有内容：正式版不符直接失败，预发布只警告（本版不弹窗）。首次安装不弹；内置文件版本与 App 版本不一致（dev 构建、占位文件）也不弹。写法见 `CLAUDE.md`「写更新说明」。

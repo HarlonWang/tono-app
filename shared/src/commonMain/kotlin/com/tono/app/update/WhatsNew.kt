@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * 随包内置的新版本更新说明（composeResources/files/whatsnew.json）。
- * 仓库里提交的是 version=0.0.0 的占位文件，CI 打 tag 构建前用 AI 生成或本地手写的真实内容覆盖（见 README「发版」）。
+ * 发版前手写本版内容（version 等于 tag），未写时是 version=0.0.0 的占位，不弹（见 CLAUDE.md「写更新说明」）。
  */
 @Serializable
 data class WhatsNewInfo(

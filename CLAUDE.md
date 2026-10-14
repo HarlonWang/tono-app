@@ -9,13 +9,12 @@
 - 加载指示统一用 M3 Expressive 的 `LoadingIndicator`，不用 `CircularProgressIndicator`。
 - 打 tag 前必须跑 `scripts/release-smoke.sh` 并看到 PASS，FAIL 时禁止发版。
 
-## 手动写更新说明
+## 写更新说明
 
-收到「这次更新说明走本地」「手动写这次更新说明」「别让 CI 自动生成」等等价说法时：
+每次发正式版都要写，CI 不自动生成，没写或 `version` 不等于 tag 时发版直接失败：
 
 1. 确定本次 tag `<版本>`，取上个正式版到 HEAD 的 commit：`git log "$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -v '^<版本>$' | head -n 1)"..HEAD --no-merges --oneline`
 2. 按面向普通用户的口径起草中英双语：滤掉构建、CI、依赖、重构、测试、文档，以及埋点、监控、日志等用户无感的改动；每条一句话，中文 3–6 条，英文对应翻译。交用户逐条定稿。
-3. 写入 `shared/src/commonMain/composeResources/files/whatsnew.json`：`{"version": "<版本>", "zh": [...], "en": [...]}`，**`version` 必须等于 tag**，否则 CI 当作自动模式用 AI 覆盖。
-4. 要自定 Play 发版说明时，同一个 commit 里写 `fastlane/metadata/android/{zh-CN,en-US}/changelogs/<versionCode>.txt`（每条前加 `• `，单文件 ≤ 500 字符，versionCode 规则见 `androidApp/build.gradle.kts`）；不写则 CI 从 whatsnew.json 生成。
-5. commit 后再打 tag，让 tag 指向含手写内容的 commit。发版后把 `whatsnew.json` 改回占位（`version: 0.0.0`、zh/en 为空），否则下个版本会被当成「版本不符」由 AI 覆盖并打警告。
-
+3. 写入 `shared/src/commonMain/composeResources/files/whatsnew.json`：`{"version": "<版本>", "zh": [...], "en": [...]}`，`version` 必须等于 tag。
+4. 要单独定 Play 发版说明时，同一个 commit 里写 `fastlane/metadata/android/{zh-CN,en-US}/changelogs/<versionCode>.txt`（每条前加 `• `，单文件 ≤ 500 字符，versionCode 规则见 `androidApp/build.gradle.kts`）；不写则 CI 从 whatsnew.json 生成。
+5. commit 后再打 tag，让 tag 指向含本版内容的 commit。
