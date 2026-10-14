@@ -36,6 +36,7 @@ import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
 import com.tono.app.ui.settings.AboutScreen
+import com.tono.app.ui.settings.AppearanceScreen
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
 import com.tono.app.ui.theme.TonoTheme
@@ -54,6 +55,7 @@ sealed interface Route
 data object Chat : Route
 data object Settings : Route
 data object About : Route
+data object Appearance : Route
 data object ProSubscription : Route
 
 /** 栈底（Chat）永不弹出：转场期间连按返回会把栈弹空，NavDisplay 抛 backstack cannot be empty。 */
@@ -126,9 +128,14 @@ fun App() {
                             )
                         }
                         is Settings -> NavEntry(key) {
-                            SettingsScreen(onBack = { backStack.safePop() }, onNavigateToAbout = { backStack.add(About) })
+                            SettingsScreen(
+                                onBack = { backStack.safePop() },
+                                onNavigateToAbout = { backStack.add(About) },
+                                onNavigateToAppearance = { backStack.add(Appearance) },
+                            )
                         }
                         is About -> NavEntry(key) { AboutScreen(onBack = { backStack.safePop() }) }
+                        is Appearance -> NavEntry(key) { AppearanceScreen(onBack = { backStack.safePop() }) }
                         is ProSubscription -> NavEntry(key) { SubscriptionScreen(onBack = { backStack.safePop() }) }
                     }
                 },

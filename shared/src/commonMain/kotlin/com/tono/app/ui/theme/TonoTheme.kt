@@ -1,10 +1,13 @@
 package com.tono.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.tono.app.data.local.globalSettings
+import wang.harlon.appsettings.appearance.AppearanceOptions
+import wang.harlon.appsettings.appearance.AppearanceTheme
+import wang.harlon.appsettings.appearance.ColorSource
+import wang.harlon.appsettings.appearance.rememberAppearanceState
 import androidx.compose.ui.graphics.Color
 
 // 色值出自 ~/TonoProjects/docs/theme/theme-design.md：黑白中性色，固定色板，不跟随壁纸
@@ -68,10 +71,16 @@ private val DarkColors = darkColorScheme(
     onErrorContainer = Color(0xFFF2B8B5),
 )
 
+/** Tono 的外观：品牌黑白色写死（theme-design.md），只开放深浅模式；色板、调色台、壁纸取色都不显示。 */
+val TonoAppearanceOptions = AppearanceOptions(
+    colorSource = ColorSource.Fixed(light = LightColors, dark = DarkColors),
+    allowCustom = false,
+    allowSystemDynamic = false,
+)
+
+/** 挂在根上：深浅模式、纯黑档、切换动画与系统栏都由 appsettings-kmp 管。 */
 @Composable
 fun TonoTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
-        content = content,
-    )
+    val appearance = rememberAppearanceState(globalSettings, TonoAppearanceOptions)
+    AppearanceTheme(appearance, content = content)
 }
