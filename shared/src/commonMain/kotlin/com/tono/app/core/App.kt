@@ -35,6 +35,7 @@ import com.tono.app.resources.chat_suggest_what_can_you_do
 import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
+import com.tono.app.ui.common.WhatsNewHost
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
 import com.tono.app.ui.theme.TonoTheme
@@ -73,6 +74,7 @@ fun App() {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             LoginSheetHost()
             ProReconcileHost(userRepository)
+            WhatsNewHost()
             LaunchedEffect(Unit) {
                 ProPaywall.requests.collect {
                     if (backStack.lastOrNull() !is ProSubscription) backStack.add(ProSubscription)

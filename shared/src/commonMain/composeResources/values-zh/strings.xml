@@ -51,4 +51,6 @@
     <string name="paywall_refund_note">支持随时取消，14 天内可申请全额退款。</string>
     <string name="paywall_already_pro">你已经是 Pro，感谢支持</string>
     <string name="paywall_checkout_failed">暂时无法发起订阅，请稍后再试</string>
+    <string name="whats_new_title">🎉 新版本 %1$s</string>
+    <string name="whats_new_got_it">知道了</string>
 </resources>
