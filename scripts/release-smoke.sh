@@ -98,6 +98,8 @@ adb -s "$serial" shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sle
 echo "    使用设备 ${serial}（$(adb -s "$serial" shell getprop ro.product.model | tr -d '\r')）"
 
 echo "==> 安装（覆盖升级路径；签名不兼容时回退全新安装）"
+# release 包的埋点 is_debug=0，冒烟产生的事件会混进线上看板：退出时（含 FAIL）清应用数据，丢掉尚未上报的队列
+trap 'adb -s "$serial" shell pm clear "$PKG" >/dev/null 2>&1 || true' EXIT
 adb -s "$serial" install -r "$APK" >/dev/null 2>&1 || {
   adb -s "$serial" uninstall "$PKG" >/dev/null 2>&1 || true
   adb -s "$serial" install "$APK" >/dev/null
