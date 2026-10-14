@@ -110,7 +110,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
             if (checkout == null) {
                 error = checkoutFailed
             } else {
-                ProCheckout.markOpened()
+                ProCheckout.markOpened(plan)
                 openInSystemBrowser(checkout.url)
             }
             busy = false

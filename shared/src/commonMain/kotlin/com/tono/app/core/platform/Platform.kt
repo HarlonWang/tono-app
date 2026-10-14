@@ -9,6 +9,9 @@ expect fun isIosPlatform(): Boolean
 /** 系统语言的 ISO 639-1 码（"zh" / "en" / …）。 */
 expect fun getSystemLanguage(): String
 
+/** 系统首选语言的完整 BCP-47 标签（"zh-Hans-CN"），埋点用。 */
+expect fun getSystemLocaleTag(): String
+
 expect fun getDeviceInfo(): String
 
 /** 系统浏览器打开外链。Paddle 收银台必须应用外打开：三方支付跳转在内置 WebView 跑不通。 */

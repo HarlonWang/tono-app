@@ -4,6 +4,11 @@ import androidx.compose.runtime.Composable
 import com.tono.app.auth.AuthState
 import com.tono.app.auth.globalAuthManager
 import com.tono.app.core.ProPaywall
+import com.tono.app.core.analytics.AiKind
+import com.tono.app.core.analytics.AiOutcome
+import com.tono.app.core.analytics.AppEvent
+import com.tono.app.core.analytics.VoiceInputOutcome
+import com.tono.app.core.analytics.track
 import com.tono.app.core.platform.openInSystemBrowser
 import com.tono.app.core.platform.requestLanguage
 import com.tono.app.data.local.globalSettingsManager
@@ -18,7 +23,9 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import wang.harlon.chatbase.host.ChatAiEvent
+import wang.harlon.chatbase.host.ChatAiOutcome
 import wang.harlon.chatbase.host.ChatHost
+import wang.harlon.chatbase.host.ChatVoiceOutcome
 import wang.harlon.chatbase.host.chatHost
 
 const val REPORT_IMAGE_URL = "https://tonote.app/report"
@@ -56,7 +63,34 @@ private object TonoChatHost : ChatHost {
         client.trackAuthTokenCache()
     }
 
-    override fun onAiEvent(event: ChatAiEvent) = Unit
+    override fun onAiEvent(event: ChatAiEvent) = track(
+        when (event) {
+            is ChatAiEvent.Requested -> AppEvent.AiRequested(AiKind.CHAT, from = event.from, imageCount = event.imageCount)
+            is ChatAiEvent.Completed -> AppEvent.AiCompleted(
+                kind = AiKind.CHAT,
+                outcome = when (event.outcome) {
+                    ChatAiOutcome.OK -> AiOutcome.OK
+                    ChatAiOutcome.ERROR -> AiOutcome.ERROR
+                    ChatAiOutcome.INTERRUPTED -> AiOutcome.INTERRUPTED
+                },
+                durationMs = event.durationMs,
+                reason = event.reason,
+                tier = event.tier,
+            )
+            is ChatAiEvent.VoiceInput -> AppEvent.VoiceInput(
+                outcome = when (event.outcome) {
+                    ChatVoiceOutcome.SENT -> VoiceInputOutcome.SENT
+                    ChatVoiceOutcome.CANCELLED -> VoiceInputOutcome.CANCELLED
+                    ChatVoiceOutcome.TOO_SHORT -> VoiceInputOutcome.TOO_SHORT
+                    ChatVoiceOutcome.EMPTY -> VoiceInputOutcome.EMPTY
+                    ChatVoiceOutcome.ERROR -> VoiceInputOutcome.ERROR
+                    ChatVoiceOutcome.PERMISSION_DENIED -> VoiceInputOutcome.PERMISSION_DENIED
+                    ChatVoiceOutcome.PRO_GATE -> VoiceInputOutcome.PRO_GATE
+                },
+                durationMs = event.durationMs,
+            )
+        },
+    )
     override val proBadge: (@Composable () -> Unit) = { ProBadge() }
 }
 

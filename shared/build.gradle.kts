@@ -43,6 +43,8 @@ kotlin {
             // api 而非 implementation：ChatScreen 等库类型出现在 shared 的 public API 上
             api(libs.chatbase.kmp)
             api(libs.loginbase.kmp)
+            // api：androidApp 要调 Android 版 Eventbase.init(context, …)
+            api(libs.eventbase.kmp)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

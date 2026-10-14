@@ -31,6 +31,9 @@ actual fun isIosPlatform(): Boolean = false
 
 actual fun getSystemLanguage(): String = java.util.Locale.getDefault().language
 
+actual fun getSystemLocaleTag(): String =
+    android.content.res.Resources.getSystem().configuration.locales[0].toLanguageTag()
+
 actual fun getDeviceInfo(): String =
     "Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; channel=${ChannelHolder.get()}"
 

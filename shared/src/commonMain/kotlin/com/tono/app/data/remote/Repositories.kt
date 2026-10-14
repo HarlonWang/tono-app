@@ -1,5 +1,6 @@
 package com.tono.app.data.remote
 
+import com.tono.app.core.analytics.setAnalyticsUser
 import com.tono.app.data.local.globalSettingsManager
 import com.tono.app.data.model.AppConfigResponse
 import com.tono.app.data.model.CheckoutResponse
@@ -18,6 +19,7 @@ class UserRepository(private val api: TonoApi = TonoApi()) {
         val me = api.fetchMe()
         globalSettingsManager.setUserEmail(me.user.email)
         globalSettingsManager.setIsPro(me.pro)
+        setAnalyticsUser(me.user.userId)
         me.user
     } catch (e: CancellationException) {
         throw e

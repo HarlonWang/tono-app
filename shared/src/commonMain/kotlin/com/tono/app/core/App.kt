@@ -132,7 +132,7 @@ private fun ProReconcileHost(userRepository: UserRepository) {
                 val attempt = ProCheckout.reconcile {
                     userRepository.syncMe() != null && globalSettingsManager.currentIsPro()
                 }
-                if (attempt != null) ProCheckout.markActivated()
+                if (attempt != null) ProCheckout.markActivated(attempt)
             }
         }
         onPauseOrDispose { }

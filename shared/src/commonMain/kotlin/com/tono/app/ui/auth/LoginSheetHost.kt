@@ -29,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import com.tono.app.auth.LoginSheetBus
 import com.tono.app.auth.LoginbaseAuthManager
 import com.tono.app.auth.globalAuthManager
+import com.tono.app.core.analytics.AppEvent
+import com.tono.app.core.analytics.AuthAction
+import com.tono.app.core.analytics.AuthOutcome
+import com.tono.app.core.analytics.track
 import com.tono.app.resources.Res
 import com.tono.app.resources.login_code_expired
 import com.tono.app.resources.login_code_hint
@@ -51,6 +55,7 @@ import com.tono.app.ui.common.TonoBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import wang.harlon.eventbase.Eventbase
 import wang.harlon.loginbase.AuthError
 import wang.harlon.loginbase.LoginbaseException
 
@@ -122,7 +127,10 @@ private fun LoginSheet(onDismiss: () -> Unit) {
                     step = Step.CODE
                     code = ""
                 }
-                .onFailure { error = describe(it) }
+                .onFailure {
+                    trackAuthFailure(it)
+                    error = describe(it)
+                }
             busy = false
         }
     }
@@ -132,8 +140,14 @@ private fun LoginSheet(onDismiss: () -> Unit) {
         busy = true
         scope.launch {
             runCatching { client.verifyCode(email.trim(), code) }
-                .onSuccess { onDismiss() }
-                .onFailure { error = describe(it) }
+                .onSuccess {
+                    track(AppEvent.AuthFinished(AuthAction.SIGN_IN, AuthOutcome.SUCCESS, method = "email"), Eventbase.currentFlow())
+                    onDismiss()
+                }
+                .onFailure {
+                    trackAuthFailure(it)
+                    error = describe(it)
+                }
             busy = false
         }
     }
@@ -225,4 +239,10 @@ private fun LoginSheet(onDismiss: () -> Unit) {
             Spacer(Modifier.height(8.dp))
         }
     }
+}
+
+/** 发码与验码的失败都算一次 auth_finished(error)：reason 取服务端错误码，连不上等非协议错误取异常类名。 */
+private fun trackAuthFailure(e: Throwable) {
+    val reason = (e as? LoginbaseException.Api)?.rawError ?: e::class.simpleName
+    track(AppEvent.AuthFinished(AuthAction.SIGN_IN, AuthOutcome.ERROR, method = "email", reason = reason), Eventbase.currentFlow())
 }

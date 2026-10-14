@@ -17,6 +17,8 @@ actual fun getSystemLanguage(): String {
     return preferred.split("-").firstOrNull() ?: "en"
 }
 
+actual fun getSystemLocaleTag(): String = NSLocale.preferredLanguages.firstOrNull() as? String ?: "en"
+
 actual fun getDeviceInfo(): String {
     val device = UIDevice.currentDevice
     return "iOS ${device.systemVersion}; ${device.model}; channel=${ChannelHolder.get()}"

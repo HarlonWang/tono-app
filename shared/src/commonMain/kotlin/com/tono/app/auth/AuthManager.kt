@@ -1,5 +1,9 @@
 package com.tono.app.auth
 
+import com.tono.app.core.analytics.AppEvent
+import com.tono.app.core.analytics.AuthAction
+import com.tono.app.core.analytics.setAnalyticsUser
+import com.tono.app.core.analytics.track
 import com.tono.app.core.platform.getAppVersion
 import com.tono.app.core.platform.getDeviceInfo
 import com.tono.app.core.platform.isIosPlatform
@@ -15,12 +19,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import wang.harlon.eventbase.Eventbase
 import wang.harlon.loginbase.AuthClient
+import wang.harlon.loginbase.AuthState as LoginbaseState
 import wang.harlon.loginbase.ClientInfo
 import wang.harlon.loginbase.ClientPlatform
 import wang.harlon.loginbase.RefreshOutcome
 import wang.harlon.loginbase.TokenStore
-import wang.harlon.loginbase.AuthState as LoginbaseState
 
 sealed interface AuthState {
     /** 会话尚未从存储恢复，不等于未登录：据此下匿名结论并写进 UI 的地方要先等它落定。 */
@@ -61,6 +66,8 @@ object LoginSheetBus {
 
     fun request(source: String) {
         _request.value = source
+        // 开一条 flow 串起本次登录，终态 auth_finished 用 Eventbase.currentFlow() 接回同一个漏斗
+        track(AppEvent.AuthStarted(AuthAction.SIGN_IN, method = "email", source = source), Eventbase.startFlow())
     }
 
     fun clear() {
@@ -85,7 +92,11 @@ class LoginbaseAuthManager(
         scope.launch {
             client.restore()
             client.authState.collect { state ->
-                if (state is LoginbaseState.SignedOut) clearAuthTokenCache()
+                if (state is LoginbaseState.SignedOut) {
+                    // 挂在这里而不是只挂 signOut()：会话被动失效不走那条路，不清 user_id 会一直带在之后的匿名事件上
+                    setAnalyticsUser(null)
+                    clearAuthTokenCache()
+                }
                 _authState.value = when (state) {
                     LoginbaseState.Unknown -> AuthState.Unknown
                     is LoginbaseState.SignedOut -> AuthState.LoggedOut
@@ -104,6 +115,8 @@ class LoginbaseAuthManager(
             globalSettingsManager.setUserEmail(null)
             globalSettingsManager.setIsPro(false)
             globalSettingsManager.followServerDefault()
+            track(AppEvent.SignedOut)
+            setAnalyticsUser(null)
             client.signOut()
         }
     }

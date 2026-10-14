@@ -1,5 +1,9 @@
 package com.tono.app.core
 
+import com.tono.app.core.analytics.AppEvent
+import com.tono.app.core.analytics.CheckoutStepKind
+import com.tono.app.core.analytics.UpsellTarget
+import com.tono.app.core.analytics.track
 import com.tono.app.data.local.globalSettingsManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -18,6 +22,7 @@ object ProPaywall {
     val requests: SharedFlow<String> = _requests.asSharedFlow()
 
     fun open(source: String) {
+        track(AppEvent.UpsellClicked(source = source, target = UpsellTarget.PRO))
         _requests.tryEmit(source)
     }
 }
@@ -27,7 +32,8 @@ object ProCheckout {
     private val RECONCILE_WINDOW = 30.minutes
     private val RETRY_DELAYS = listOf(0.seconds, 3.seconds, 8.seconds, 15.seconds)
 
-    fun markOpened() {
+    fun markOpened(plan: String) {
+        track(AppEvent.CheckoutStep(CheckoutStepKind.OPENED, plan = plan))
         globalSettingsManager.setCheckoutOpenedAt(Clock.System.now().toEpochMilliseconds())
     }
 
@@ -53,7 +59,8 @@ object ProCheckout {
         return null
     }
 
-    fun markActivated() {
+    fun markActivated(attempt: Int) {
+        track(AppEvent.CheckoutStep(CheckoutStepKind.RECONCILED, attempt = attempt))
         globalSettingsManager.clearCheckoutOpenedAt()
         _activated.tryEmit(Unit)
     }
