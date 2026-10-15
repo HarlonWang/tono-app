@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">Tono</string>
     <string name="common_back">返回</string>
     <string name="common_cancel">取消</string>
 
@@ -23,6 +24,7 @@
     <string name="login_too_many_requests_minutes">请求过于频繁，请 %d 分钟后再试。</string>
     <string name="login_generic_error">出了点问题，请稍后再试。</string>
 
+    <string name="settings_group_account">账户</string>
     <string name="settings_title">设置</string>
     <string name="settings_sign_in">登录</string>
     <string name="settings_sign_out">退出登录</string>
@@ -31,9 +33,6 @@
     <string name="settings_pro_active">Tono Pro 已开通</string>
     <string name="settings_pro_upgrade">升级 Pro</string>
     <string name="settings_manage_subscription">管理订阅</string>
-    <string name="settings_privacy">隐私政策</string>
-    <string name="settings_terms">服务条款</string>
-    <string name="settings_version">版本 %s</string>
 
     <string name="paywall_title">升级 Pro</string>
     <string name="paywall_subtitle">更多额度、全部模型、语音与图片，随时取消</string>
@@ -51,6 +50,4 @@
     <string name="paywall_refund_note">支持随时取消，14 天内可申请全额退款。</string>
     <string name="paywall_already_pro">你已经是 Pro，感谢支持</string>
     <string name="paywall_checkout_failed">暂时无法发起订阅，请稍后再试</string>
-    <string name="whats_new_title">🎉 新版本 %1$s</string>
-    <string name="whats_new_got_it">知道了</string>
 </resources>

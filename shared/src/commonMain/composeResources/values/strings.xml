@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">Tono</string>
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
 
@@ -23,6 +24,7 @@
     <string name="login_too_many_requests_minutes">Too many requests. Try again in %d min.</string>
     <string name="login_generic_error">Something went wrong. Please try again.</string>
 
+    <string name="settings_group_account">Account</string>
     <string name="settings_title">Settings</string>
     <string name="settings_sign_in">Sign in</string>
     <string name="settings_sign_out">Sign out</string>
@@ -31,9 +33,6 @@
     <string name="settings_pro_active">Tono Pro is active</string>
     <string name="settings_pro_upgrade">Upgrade to Pro</string>
     <string name="settings_manage_subscription">Manage subscription</string>
-    <string name="settings_privacy">Privacy policy</string>
-    <string name="settings_terms">Terms of service</string>
-    <string name="settings_version">Version %s</string>
 
     <string name="paywall_title">Upgrade to Pro</string>
     <string name="paywall_subtitle">More credits, every model, voice and images. Cancel anytime.</string>
@@ -51,6 +50,4 @@
     <string name="paywall_refund_note">Cancel anytime. Full refund available within 14 days.</string>
     <string name="paywall_already_pro">You\'re already a Pro member — thank you!</string>
     <string name="paywall_checkout_failed">Couldn\'t start the subscription right now. Please try again.</string>
-    <string name="whats_new_title">🎉 What&apos;s New in %1$s</string>
-    <string name="whats_new_got_it">Got it</string>
 </resources>

@@ -45,6 +45,8 @@ kotlin {
             api(libs.loginbase.kmp)
             // api：androidApp 要调 Android 版 Eventbase.init(context, …)
             api(libs.eventbase.kmp)
+            // 设置 UI 基元、更新说明等与业务无关的设置层
+            implementation(libs.appsettings.kmp)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

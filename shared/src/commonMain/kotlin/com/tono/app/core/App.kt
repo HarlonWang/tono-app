@@ -35,19 +35,31 @@ import com.tono.app.resources.chat_suggest_what_can_you_do
 import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
-import com.tono.app.ui.common.WhatsNewHost
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
-import com.tono.app.ui.theme.TonoTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import wang.harlon.chatbase.model.ChatModelsProvider
 import wang.harlon.chatbase.ui.ChatScreen
 import wang.harlon.chatbase.ui.ChatSuggestion
+import com.tono.app.data.local.globalSettings
+import wang.harlon.appsettings.AboutScreen
+import wang.harlon.appsettings.AppSettingsRoot
+import wang.harlon.appsettings.AppearanceScreen
+import wang.harlon.appsettings.rememberAppSettings
+import wang.harlon.appsettings.appearance.ColorSource
+import wang.harlon.appsettings.ui.SettingsPage
+import com.tono.app.ui.theme.TonoLightColors
+import com.tono.app.ui.theme.TonoDarkColors
+import com.tono.app.ui.settings.PRIVACY_URL
+import com.tono.app.ui.settings.TERMS_URL
+import com.tono.app.resources.app_name
 
 sealed interface Route
 data object Chat : Route
 data object Settings : Route
+data object About : Route
+data object Appearance : Route
 data object ProSubscription : Route
 
 /** 栈底（Chat）永不弹出：转场期间连按返回会把栈弹空，NavDisplay 抛 backstack cannot be empty。 */
@@ -70,11 +82,25 @@ fun App() {
         ChatModelsProvider.warmUp(this)
     }
 
-    TonoTheme {
+    // 设置层的全部配置：品牌黑白色写死（theme-design.md）只开放深浅模式，关于页两条链接，升级后首启弹更新说明
+    val appSettings = rememberAppSettings {
+        settings = globalSettings
+        appearance {
+            colorSource = ColorSource.Fixed(light = TonoLightColors, dark = TonoDarkColors)
+            allowCustom = false
+            allowSystemDynamic = false
+        }
+        about {
+            name = stringResource(Res.string.app_name)
+            privacy = PRIVACY_URL
+            terms = TERMS_URL
+        }
+        whatsNew { bundled = { Res.readBytes("files/whatsnew.json").decodeToString() } }
+    }
+    AppSettingsRoot(appSettings) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             LoginSheetHost()
             ProReconcileHost(userRepository)
-            WhatsNewHost()
             LaunchedEffect(Unit) {
                 ProPaywall.requests.collect {
                     if (backStack.lastOrNull() !is ProSubscription) backStack.add(ProSubscription)
@@ -113,7 +139,16 @@ fun App() {
                                 ),
                             )
                         }
-                        is Settings -> NavEntry(key) { SettingsScreen(onBack = { backStack.safePop() }) }
+                        is Settings -> NavEntry(key) {
+                            SettingsScreen(
+                                onBack = { backStack.safePop() },
+                                onOpen = { page ->
+                                    backStack.add(when (page) { SettingsPage.Appearance -> Appearance; SettingsPage.About -> About })
+                                },
+                            )
+                        }
+                        is About -> NavEntry(key) { AboutScreen(onBack = { backStack.safePop() }) }
+                        is Appearance -> NavEntry(key) { AppearanceScreen(onBack = { backStack.safePop() }) }
                         is ProSubscription -> NavEntry(key) { SubscriptionScreen(onBack = { backStack.safePop() }) }
                     }
                 },

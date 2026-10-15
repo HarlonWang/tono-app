@@ -17,7 +17,6 @@ private const val CHAT_IMAGES_MAX_KEY = "prefs_chat_images_max"
 private const val CHAT_IMAGES_PER_KB_KEY = "prefs_chat_images_per_kb"
 private const val CHAT_VOICE_MAX_MS_KEY = "prefs_chat_voice_max_ms"
 private const val CHECKOUT_OPENED_AT_KEY = "prefs_checkout_opened_at"
-private const val LAST_SEEN_WHATSNEW_KEY = "prefs_last_seen_whatsnew"
 
 class SettingsManager(private val settings: ObservableSettings) {
 
@@ -62,8 +61,6 @@ class SettingsManager(private val settings: ObservableSettings) {
     fun clearCheckoutOpenedAt() = settings.remove(CHECKOUT_OPENED_AT_KEY)
 
     /** 上次弹过（或首装时静默记下）更新说明的版本；null 表示首次安装。 */
-    fun getLastSeenWhatsNewVersion(): String? = settings.getStringOrNull(LAST_SEEN_WHATSNEW_KEY)
-    fun setLastSeenWhatsNewVersion(version: String) = settings.putString(LAST_SEEN_WHATSNEW_KEY, version)
 }
 
 val globalSettings: ObservableSettings by lazy { Settings() as ObservableSettings }
