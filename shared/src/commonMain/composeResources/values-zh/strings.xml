@@ -24,10 +24,7 @@
     <string name="login_too_many_requests_minutes">请求过于频繁，请 %d 分钟后再试。</string>
     <string name="login_generic_error">出了点问题，请稍后再试。</string>
 
-    <string name="settings_appearance">外观</string>
     <string name="settings_group_account">账户</string>
-    <string name="settings_group_general">通用</string>
-    <string name="settings_about">关于</string>
     <string name="settings_title">设置</string>
     <string name="settings_sign_in">登录</string>
     <string name="settings_sign_out">退出登录</string>

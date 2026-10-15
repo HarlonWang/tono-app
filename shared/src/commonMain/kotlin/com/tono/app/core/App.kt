@@ -35,21 +35,25 @@ import com.tono.app.resources.chat_suggest_what_can_you_do
 import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
-import com.tono.app.ui.settings.AboutScreen
-import com.tono.app.ui.settings.AppearanceScreen
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
-import com.tono.app.ui.theme.TonoTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import wang.harlon.chatbase.model.ChatModelsProvider
 import wang.harlon.chatbase.ui.ChatScreen
 import wang.harlon.chatbase.ui.ChatSuggestion
-import wang.harlon.appsettings.whatsnew.WhatsNewHost
-import wang.harlon.appsettings.whatsnew.rememberWhatsNewState
 import com.tono.app.data.local.globalSettings
-import com.tono.app.core.platform.getAppVersion
-import com.tono.app.core.platform.getSystemLanguage
+import wang.harlon.appsettings.AboutScreen
+import wang.harlon.appsettings.AppSettingsRoot
+import wang.harlon.appsettings.AppearanceScreen
+import wang.harlon.appsettings.rememberAppSettings
+import wang.harlon.appsettings.appearance.ColorSource
+import wang.harlon.appsettings.ui.SettingsPage
+import com.tono.app.ui.theme.TonoLightColors
+import com.tono.app.ui.theme.TonoDarkColors
+import com.tono.app.ui.settings.PRIVACY_URL
+import com.tono.app.ui.settings.TERMS_URL
+import com.tono.app.resources.app_name
 
 sealed interface Route
 data object Chat : Route
@@ -78,17 +82,25 @@ fun App() {
         ChatModelsProvider.warmUp(this)
     }
 
-    TonoTheme {
+    // 设置层的全部配置：品牌黑白色写死（theme-design.md）只开放深浅模式，关于页两条链接，升级后首启弹更新说明
+    val appSettings = rememberAppSettings {
+        settings = globalSettings
+        appearance {
+            colorSource = ColorSource.Fixed(light = TonoLightColors, dark = TonoDarkColors)
+            allowCustom = false
+            allowSystemDynamic = false
+        }
+        about {
+            name = stringResource(Res.string.app_name)
+            privacy = PRIVACY_URL
+            terms = TERMS_URL
+        }
+        whatsNew { bundled = { Res.readBytes("files/whatsnew.json").decodeToString() } }
+    }
+    AppSettingsRoot(appSettings) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             LoginSheetHost()
             ProReconcileHost(userRepository)
-            // 升级后首启弹一次更新说明：状态与弹窗在 appsettings-kmp，这里只给版本、JSON 与展示语言
-            val whatsNew = rememberWhatsNewState(
-                settings = globalSettings,
-                currentVersion = remember { getAppVersion() },
-                load = { Res.readBytes("files/whatsnew.json").decodeToString() },
-            )
-            WhatsNewHost(whatsNew, language = getSystemLanguage())
             LaunchedEffect(Unit) {
                 ProPaywall.requests.collect {
                     if (backStack.lastOrNull() !is ProSubscription) backStack.add(ProSubscription)
@@ -130,8 +142,9 @@ fun App() {
                         is Settings -> NavEntry(key) {
                             SettingsScreen(
                                 onBack = { backStack.safePop() },
-                                onNavigateToAbout = { backStack.add(About) },
-                                onNavigateToAppearance = { backStack.add(Appearance) },
+                                onOpen = { page ->
+                                    backStack.add(when (page) { SettingsPage.Appearance -> Appearance; SettingsPage.About -> About })
+                                },
                             )
                         }
                         is About -> NavEntry(key) { AboutScreen(onBack = { backStack.safePop() }) }

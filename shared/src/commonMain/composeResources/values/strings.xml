@@ -24,10 +24,7 @@
     <string name="login_too_many_requests_minutes">Too many requests. Try again in %d min.</string>
     <string name="login_generic_error">Something went wrong. Please try again.</string>
 
-    <string name="settings_appearance">Appearance</string>
     <string name="settings_group_account">Account</string>
-    <string name="settings_group_general">General</string>
-    <string name="settings_about">About</string>
     <string name="settings_title">Settings</string>
     <string name="settings_sign_in">Sign in</string>
     <string name="settings_sign_out">Sign out</string>
