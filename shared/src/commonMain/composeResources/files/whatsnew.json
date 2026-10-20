@@ -1,11 +1,13 @@
 {
-  "version": "0.6.0",
+  "version": "0.7.0",
   "zh": [
-    "新增版本更新说明，升级后可查看本次更新内容",
+    "新增删除账号：在设置中通过邮箱验证码永久删除账号",
+    "新增外观设置，可选择浅色、深色或跟随系统",
     "稳定性与体验优化"
   ],
   "en": [
-    "Added release notes so you can see what's new after each update",
+    "Delete your account from Settings, confirmed with an email code",
+    "New Appearance setting: light, dark, or follow system",
     "Stability and experience improvements"
   ]
 }
