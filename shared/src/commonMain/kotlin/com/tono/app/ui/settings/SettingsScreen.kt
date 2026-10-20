@@ -3,6 +3,7 @@ package com.tono.app.ui.settings
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.tono.app.auth.AuthState
+import com.tono.app.auth.LoginbaseAuthManager
 import com.tono.app.auth.globalAuthManager
 import com.tono.app.core.ProPaywall
 import com.tono.app.core.platform.openInSystemBrowser
@@ -25,6 +27,9 @@ import com.tono.app.data.local.globalSettingsManager
 import com.tono.app.data.remote.BillingRepository
 import com.tono.app.resources.Res
 import com.tono.app.resources.common_cancel
+import com.tono.app.resources.common_ok
+import com.tono.app.resources.delete_account_done
+import com.tono.app.resources.settings_delete_account
 import com.tono.app.resources.settings_account_signed_out
 import com.tono.app.resources.settings_manage_subscription
 import com.tono.app.resources.settings_pro_active
@@ -52,6 +57,10 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
     val scope = rememberCoroutineScope()
     val billing = remember { BillingRepository() }
     var confirmSignOut by remember { mutableStateOf(false) }
+    var deletingAccount by remember { mutableStateOf(false) }
+    var accountDeleted by remember { mutableStateOf(false) }
+    val loginbase = globalAuthManager as? LoginbaseAuthManager
+    val openPortal: () -> Unit = { scope.launch { billing.createPortal()?.overview?.let { openInSystemBrowser(it) } } }
     val signedIn = authState is AuthState.LoggedIn
 
     AppSettingsScreen(onBack = onBack, onOpen = onOpen) {
@@ -70,7 +79,7 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
                     settingsItem(
                         icon = Icons.Filled.Lock,
                         title = { Text(stringResource(Res.string.settings_manage_subscription)) },
-                        onClick = { scope.launch { billing.createPortal()?.overview?.let { openInSystemBrowser(it) } } },
+                        onClick = openPortal,
                     )
                 }
                 settingsItem(
@@ -78,6 +87,15 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
                     title = { Text(stringResource(Res.string.settings_sign_out)) },
                     onClick = { confirmSignOut = true },
                 )
+                if (loginbase != null) {
+                    settingsItem(
+                        icon = Icons.Filled.DeleteForever,
+                        title = {
+                            Text(stringResource(Res.string.settings_delete_account), color = MaterialTheme.colorScheme.error)
+                        },
+                        onClick = { deletingAccount = true },
+                    )
+                }
             } else {
                 settingsItem(
                     icon = Icons.Filled.AccountCircle,
@@ -92,6 +110,29 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
             }
         }
         GeneralSettingsGroup()
+    }
+
+    if (deletingAccount && loginbase != null) {
+        DeleteAccountSheet(
+            manager = loginbase,
+            email = email,
+            onManageSubscription = openPortal,
+            onDeleted = {
+                deletingAccount = false
+                accountDeleted = true
+            },
+            onDismiss = { deletingAccount = false },
+        )
+    }
+
+    if (accountDeleted) {
+        AlertDialog(
+            onDismissRequest = { accountDeleted = false },
+            text = { Text(stringResource(Res.string.delete_account_done)) },
+            confirmButton = {
+                TextButton(onClick = { accountDeleted = false }) { Text(stringResource(Res.string.common_ok)) }
+            },
+        )
     }
 
     if (confirmSignOut) {

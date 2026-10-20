@@ -33,6 +33,17 @@
     <string name="settings_pro_active">Tono Pro 已开通</string>
     <string name="settings_pro_upgrade">升级 Pro</string>
     <string name="settings_manage_subscription">管理订阅</string>
+    <string name="settings_delete_account">删除账号</string>
+    <string name="delete_account_title">删除账号</string>
+    <string name="delete_account_warning">删除后，你的账号、订阅记录与使用记录将被永久删除，无法恢复。本机上的聊天记录不受影响，可在对话列表中删除，或卸载 App 清除。</string>
+    <string name="delete_account_verify_hint">我们会向 %s 发送验证码，确认是你本人操作。</string>
+    <string name="delete_account_send_code">发送验证码</string>
+    <string name="delete_account_code_sent_to">删号验证码已发送至 %s</string>
+    <string name="delete_account_confirm">永久删除账号</string>
+    <string name="delete_account_blocked_subscription">你有生效中的 Tono Pro 订阅。请先取消订阅，再删除账号。</string>
+    <string name="delete_account_blocked">此账号暂时无法删除。如需帮助，请联系 support@tonote.app。</string>
+    <string name="delete_account_done">账号已删除。</string>
+    <string name="common_ok">好</string>
 
     <string name="paywall_title">升级 Pro</string>
     <string name="paywall_subtitle">更多额度、全部模型、语音与图片，随时取消</string>

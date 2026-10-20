@@ -112,13 +112,30 @@ class LoginbaseAuthManager(
     override fun signOut() {
         scope.launch {
             // 本地清理排在 client.signOut() 前：后者要等 DELETE /sessions 返回
-            globalSettingsManager.setUserEmail(null)
-            globalSettingsManager.setIsPro(false)
-            globalSettingsManager.followServerDefault()
+            clearLocalUser()
             track(AppEvent.SignedOut)
             setAnalyticsUser(null)
             client.signOut()
         }
+    }
+
+    /** 删号第一步：往账号邮箱发删号码。服务端拒删时抛 [wang.harlon.loginbase.AuthError.DELETION_BLOCKED]。 */
+    suspend fun sendAccountDeletionCode() = client.sendAccountDeletionCode()
+
+    /**
+     * 删号第二步：服务端成功后库已清掉会话（authState 收集处随之清埋点 user），这里补齐 App 自己的本地状态。
+     * 失败时抛出、保持登录态，由调用方展示错误。
+     */
+    suspend fun deleteAccount(code: String) {
+        client.deleteAccount(code)
+        track(AppEvent.AccountDeleted)
+        clearLocalUser()
+    }
+
+    private fun clearLocalUser() {
+        globalSettingsManager.setUserEmail(null)
+        globalSettingsManager.setIsPro(false)
+        globalSettingsManager.followServerDefault()
     }
 
     override suspend fun getAccessToken(): String? = client.accessToken()

@@ -51,6 +51,9 @@ sealed class AppEvent(
 
     data object SignedOut : AppEvent("signed_out")
 
+    /** 删号成功；服务端随即把该用户的历史事件匿名化 */
+    data object AccountDeleted : AppEvent("account_deleted")
+
     data class UpsellClicked(val source: String, val target: UpsellTarget) :
         AppEvent("upsell_clicked", mapOf("source" to source, "target" to target))
 
