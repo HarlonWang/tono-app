@@ -34,6 +34,8 @@
     <string name="settings_pro_upgrade">升级 Pro</string>
     <string name="settings_manage_subscription">管理订阅</string>
     <string name="settings_delete_account">删除账号</string>
+    <string name="settings_group_support">帮助与安全</string>
+    <string name="settings_report">举报内容</string>
     <string name="delete_account_title">删除账号</string>
     <string name="delete_account_warning">删除后，你的账号、订阅记录与使用记录将被永久删除，无法恢复。本机上的聊天记录不受影响，可在对话列表中删除，或卸载 App 清除。</string>
     <string name="delete_account_verify_hint">我们会向 %s 发送验证码，确认是你本人操作。</string>

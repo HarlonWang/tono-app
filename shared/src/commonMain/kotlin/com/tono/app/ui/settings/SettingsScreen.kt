@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -40,6 +41,8 @@ import com.tono.app.resources.settings_sign_out_confirm
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import com.tono.app.resources.settings_group_account
+import com.tono.app.resources.settings_group_support
+import com.tono.app.resources.settings_report
 import wang.harlon.appsettings.ui.SettingsGroup
 import wang.harlon.appsettings.GeneralSettingsGroup
 import wang.harlon.appsettings.SettingsScreen as AppSettingsScreen
@@ -48,7 +51,10 @@ import wang.harlon.appsettings.ui.SettingsPage
 const val PRIVACY_URL = "https://tonote.app/privacy"
 const val TERMS_URL = "https://tonote.app/terms"
 
-/** 设置页：壳、滚动与通用行（外观 / 关于）来自 appsettings-kmp，这里只摆账户组。 */
+/** 举报入口（不良 AI 内容、滥用等），App Store 对 AI 生成内容类 App 要求可在 App 内找到；生成图的举报也走这里 */
+const val REPORT_URL = "https://tonote.app/report"
+
+/** 设置页：壳、滚动与通用行（外观 / 关于）来自 appsettings-kmp，这里摆账户组与举报入口。 */
 @Composable
 fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
     val authState by globalAuthManager.authState.collectAsState()
@@ -108,6 +114,13 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
                     onClick = { ProPaywall.open(ProPaywall.SOURCE_SETTINGS) },
                 )
             }
+        }
+        SettingsGroup(title = stringResource(Res.string.settings_group_support)) {
+            settingsItem(
+                icon = Icons.Filled.Flag,
+                title = { Text(stringResource(Res.string.settings_report)) },
+                onClick = { openInSystemBrowser(REPORT_URL) },
+            )
         }
         GeneralSettingsGroup()
     }

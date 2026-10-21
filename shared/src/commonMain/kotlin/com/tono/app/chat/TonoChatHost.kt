@@ -22,13 +22,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import com.tono.app.ui.settings.REPORT_URL
 import wang.harlon.chatbase.host.ChatAiEvent
 import wang.harlon.chatbase.host.ChatAiOutcome
 import wang.harlon.chatbase.host.ChatHost
 import wang.harlon.chatbase.host.ChatVoiceOutcome
 import wang.harlon.chatbase.host.chatHost
-
-const val REPORT_IMAGE_URL = "https://tonote.app/report"
 
 private object TonoChatHost : ChatHost {
     override val apiBaseUrl = "$API_HOST/api"
@@ -42,7 +41,7 @@ private object TonoChatHost : ChatHost {
 
     override fun signIn(source: String) = globalAuthManager.signIn(source)
     override fun openPaywall(source: String) = ProPaywall.open(source)
-    override fun reportGeneratedImage(imageUrl: String) = openInSystemBrowser(REPORT_IMAGE_URL)
+    override fun reportGeneratedImage(imageUrl: String) = openInSystemBrowser(REPORT_URL)
 
     override fun currentIsPro() = globalSettingsManager.currentIsPro()
     override val isPro: Flow<Boolean> get() = globalSettingsManager.isPro

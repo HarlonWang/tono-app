@@ -34,6 +34,8 @@
     <string name="settings_pro_upgrade">Upgrade to Pro</string>
     <string name="settings_manage_subscription">Manage subscription</string>
     <string name="settings_delete_account">Delete account</string>
+    <string name="settings_group_support">Help &amp; safety</string>
+    <string name="settings_report">Report content</string>
     <string name="delete_account_title">Delete account</string>
     <string name="delete_account_warning">Deleting your account permanently removes your account, subscription records, and usage history. This can't be undone. Chats stored on this device aren't affected; delete them from the chat list or uninstall the app.</string>
     <string name="delete_account_verify_hint">We'll send a verification code to %s to confirm it's you.</string>
