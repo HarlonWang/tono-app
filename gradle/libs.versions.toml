@@ -24,6 +24,8 @@ loginbase-kmp = "0.7.0"
 chatbase-kmp = "0.1.4"
 eventbase-kmp = "0.5.0"
 appsettings-kmp = "0.2.1"
+# App Store 订阅（RevenueCat），只进 iosMain；Android 仍走 Paddle
+revenuecat-kmp = "3.15.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -58,6 +60,7 @@ loginbase-kmp = { module = "wang.harlon:loginbase-kmp", version.ref = "loginbase
 chatbase-kmp = { module = "wang.harlon:chatbase-kmp", version.ref = "chatbase-kmp" }
 eventbase-kmp = { module = "wang.harlon:eventbase-kmp", version.ref = "eventbase-kmp" }
 appsettings-kmp = { module = "wang.harlon:appsettings-kmp", version.ref = "appsettings-kmp" }
+revenuecat-kmp-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat-kmp" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

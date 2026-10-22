@@ -4,6 +4,7 @@ import com.tono.app.core.analytics.AppEvent
 import com.tono.app.core.analytics.AuthAction
 import com.tono.app.core.analytics.setAnalyticsUser
 import com.tono.app.core.analytics.track
+import com.tono.app.core.billing.AppStoreBilling
 import com.tono.app.core.platform.getAppVersion
 import com.tono.app.core.platform.getDeviceInfo
 import com.tono.app.core.platform.isIosPlatform
@@ -133,6 +134,7 @@ class LoginbaseAuthManager(
     }
 
     private fun clearLocalUser() {
+        AppStoreBilling.reset()
         globalSettingsManager.setUserEmail(null)
         globalSettingsManager.setIsPro(false)
         globalSettingsManager.followServerDefault()

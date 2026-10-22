@@ -63,4 +63,13 @@
     <string name="paywall_refund_note">Cancel anytime. Full refund available within 14 days.</string>
     <string name="paywall_already_pro">You're already a Pro member — thank you!</string>
     <string name="paywall_checkout_failed">Couldn't start the subscription right now. Please try again.</string>
+    <string name="paywall_ios_refund_note">Cancel anytime in Settings. Refunds are handled by Apple.</string>
+    <string name="paywall_ios_disclosure">Payment will be charged to your Apple Account at confirmation of purchase. Your subscription renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel anytime in Settings &gt; Apple Account &gt; Subscriptions.</string>
+    <string name="paywall_ios_restore">Restore Purchases</string>
+    <string name="paywall_ios_restore_none">No subscription to restore.</string>
+    <string name="paywall_ios_restore_done">Your Pro subscription has been restored.</string>
+    <string name="paywall_ios_purchase_failed">The purchase didn't go through. Please try again.</string>
+    <string name="paywall_ios_pro_via_web">Your Pro subscription from the web works on iOS too.</string>
+    <string name="paywall_ios_privacy">Privacy Policy</string>
+    <string name="paywall_ios_terms">Terms of Use</string>
 </resources>

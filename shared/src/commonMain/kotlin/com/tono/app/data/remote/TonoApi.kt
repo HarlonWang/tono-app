@@ -6,6 +6,7 @@ import com.tono.app.data.model.CheckoutResponse
 import com.tono.app.data.model.MeResponse
 import com.tono.app.data.model.PortalResponse
 import com.tono.app.data.model.PricesResponse
+import com.tono.app.data.model.SubscriptionResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
@@ -71,6 +72,9 @@ open class TonoApi {
             header("X-Install-Id", installId)
             setBody(buildJsonObject { put("plan", plan) })
         }.bodyOrThrow()
+
+    open suspend fun fetchSubscription(): SubscriptionResponse =
+        client.get("$API_HOST/api/billing/subscription").bodyOrThrow()
 
     open suspend fun createPortalSession(): PortalResponse =
         client.post("$API_HOST/api/billing/portal").bodyOrThrow()

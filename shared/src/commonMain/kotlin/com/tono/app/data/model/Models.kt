@@ -41,6 +41,10 @@ data class PortalResponse(
     @SerialName("update_payment") val updatePayment: String? = null,
 )
 
+/** /api/billing/subscription 只取来源；Paddle 行与 Apple 行的细节客户端不用。 */
+@Serializable
+data class SubscriptionResponse(val source: String? = null)
+
 @Serializable
 data class AppConfigResponse(
     @SerialName("min_version") val minVersion: String? = null,
@@ -68,6 +72,20 @@ data class ProPaywallRemoteConfig(
     @SerialName("refund_note") val refundNote: LocalizedText? = null,
     @SerialName("already_pro") val alreadyPro: LocalizedText? = null,
     @SerialName("checkout_failed") val checkoutFailed: LocalizedText? = null,
+    /** iOS 专用替换字段（App Store 审核口径），Android 不读 */
+    @SerialName("app_store") val appStore: AppStorePaywallRemoteConfig? = null,
+)
+
+@Serializable
+data class AppStorePaywallRemoteConfig(
+    @SerialName("refund_note") val refundNote: LocalizedText? = null,
+    val disclosure: LocalizedText? = null,
+    val restore: LocalizedText? = null,
+    @SerialName("restore_none") val restoreNone: LocalizedText? = null,
+    @SerialName("restore_done") val restoreDone: LocalizedText? = null,
+    @SerialName("purchase_failed") val purchaseFailed: LocalizedText? = null,
+    @SerialName("pro_via_web") val proViaWeb: LocalizedText? = null,
+    val manage: LocalizedText? = null,
 )
 
 @Serializable
