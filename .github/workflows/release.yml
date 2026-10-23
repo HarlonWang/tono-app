@@ -10,6 +10,11 @@ on:
         description: "版本名（MAJOR.MINOR.PATCH[-后缀]，决定 versionCode）；留空为 0.0.1-ci"
         required: false
         default: ""
+      play_track:
+        description: "传 Play 哪条轨道：none 只出 artifact；internal 传内部测试轨道（不送审、不写发版说明）"
+        type: choice
+        options: [none, internal]
+        default: none
 
 permissions:
   contents: write
@@ -119,7 +124,7 @@ jobs:
       # 密钥经 SUPPLY_JSON_KEY_DATA 环境变量传入（fastlane 原生识别），不落盘。预发布 tag（带 -）不上 Play。
       # 数据安全、内容分级、登录详细信息等政策声明 Play 没有 API，变更时须先在 Play Console 手动改好再打 tag。
       - uses: ruby/setup-ruby@v1
-        if: github.event_name == 'push' && !contains(github.ref_name, '-')
+        if: (github.event_name == 'push' && !contains(github.ref_name, '-')) || github.event.inputs.play_track == 'internal'
         with:
           ruby-version: '3.2'
 
@@ -169,5 +174,22 @@ jobs:
             --metadata_path fastlane/metadata/android \
             --skip_upload_apk true \
             --skip_upload_metadata true \
+            --skip_upload_images true \
+            --skip_upload_screenshots true
+
+      # 手动触发且 play_track=internal：只传内部测试轨道，不送审、不写发版说明。
+      # 用于先把带新权限 / 新结算库的包放到 Play 上（如建订阅商品前 Play 要求已有带 BILLING 权限的版本）
+      - name: Publish to Google Play (internal track)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.play_track == 'internal'
+        env:
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          gem install fastlane --no-document
+          fastlane supply --package_name com.tono.android \
+            --aab Tono-${VERSION_NAME}-play.aab \
+            --track internal \
+            --skip_upload_apk true \
+            --skip_upload_metadata true \
+            --skip_upload_changelogs true \
             --skip_upload_images true \
             --skip_upload_screenshots true
