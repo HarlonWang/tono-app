@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tono.app.auth.LoginbaseAuthManager
-import com.tono.app.core.platform.isIosPlatform
 import com.tono.app.resources.Res
 import com.tono.app.resources.delete_account_blocked
 import com.tono.app.resources.delete_account_blocked_subscription
@@ -68,7 +67,8 @@ private const val REASON_ACTIVE_SUBSCRIPTION = "active_subscription"
 fun DeleteAccountSheet(
     manager: LoginbaseAuthManager,
     email: String,
-    onManageSubscription: () -> Unit,
+    /** 去取消订阅的入口；商店构建里 Paddle 来源没有可放的链接时为 null，只给文字提示 */
+    onManageSubscription: (() -> Unit)?,
     onDeleted: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -198,8 +198,7 @@ fun DeleteAccountSheet(
             error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
-            // iOS 首版不放任何 Paddle 链接（App Store 3.1.1），只给文字提示
-            if (blockedBySubscription && !isIosPlatform()) {
+            if (blockedBySubscription && onManageSubscription != null) {
                 TextButton(onClick = onManageSubscription) {
                     Text(stringResource(Res.string.settings_manage_subscription))
                 }

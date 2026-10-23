@@ -24,8 +24,7 @@ import com.tono.app.auth.AuthState
 import com.tono.app.auth.LoginbaseAuthManager
 import com.tono.app.auth.globalAuthManager
 import com.tono.app.core.ProPaywall
-import com.tono.app.core.billing.APP_STORE_MANAGE_URL
-import com.tono.app.core.billing.AppStoreBilling
+import com.tono.app.core.billing.StoreBilling
 import com.tono.app.core.platform.openInSystemBrowser
 import com.tono.app.data.local.globalSettingsManager
 import com.tono.app.data.remote.BillingRepository
@@ -70,14 +69,19 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
     var accountDeleted by remember { mutableStateOf(false) }
     val loginbase = globalAuthManager as? LoginbaseAuthManager
     val openPortal: () -> Unit = { scope.launch { billing.createPortal()?.overview?.let { openInSystemBrowser(it) } } }
-    // iOS 只给 App Store 来源的订阅放管理入口（跳系统订阅页）；Paddle 门户属外部购买链接，iOS 上不放（3.1.1）
-    val appStore = AppStoreBilling.available
+    // 商店来源的订阅跳各自系统的订阅页；Paddle 来源只在非商店构建里放门户链接：
+    // 商店构建（iOS、Android Play 渠道）里 Paddle 门户属外部购买链接，不放（App Store 3.1.1、Play 付款政策）
     var proSource by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(isPro) {
-        if (appStore && isPro) proSource = billing.fetchSubscriptionSource()
+        if (isPro) proSource = billing.fetchSubscriptionSource()
     }
-    val showManage = isPro && (!appStore || proSource == "apple")
-    val manageSubscription: () -> Unit = if (appStore) ({ openInSystemBrowser(APP_STORE_MANAGE_URL) }) else openPortal
+    val manageUrl = StoreBilling.manageUrlOf(proSource)
+    val manageSubscription: (() -> Unit)? = when {
+        !isPro -> null
+        manageUrl != null -> ({ openInSystemBrowser(manageUrl) })
+        proSource == "paddle" && !StoreBilling.available -> openPortal
+        else -> null
+    }
     val signedIn = authState is AuthState.LoggedIn
 
     AppSettingsScreen(onBack = onBack, onOpen = onOpen) {
@@ -92,7 +96,7 @@ fun SettingsScreen(onBack: () -> Unit, onOpen: (SettingsPage) -> Unit) {
                     title = { Text(stringResource(if (isPro) Res.string.settings_pro_active else Res.string.settings_pro_upgrade)) },
                     onClick = if (isPro) null else ({ ProPaywall.open(ProPaywall.SOURCE_SETTINGS) }),
                 )
-                if (showManage) {
+                if (manageSubscription != null) {
                     settingsItem(
                         icon = Icons.Filled.Lock,
                         title = { Text(stringResource(Res.string.settings_manage_subscription)) },

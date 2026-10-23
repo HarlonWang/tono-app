@@ -67,11 +67,11 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.coroutines)
+            // 商店订阅两端共用（App Store / Google Play）；Android 侧随之带入 Play 结算库与 BILLING 权限
+            implementation(libs.revenuecat.kmp.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            // 只在 iOS 引入：放进 commonMain 会把 Play 结算库与 BILLING 权限带进 Android 包
-            implementation(libs.revenuecat.kmp.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

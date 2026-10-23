@@ -11,8 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <!-- launchMode 须为 standard / singleTop（RevenueCat 要求）：Play 结算跳银行验证回来时才不会把购买取消 -->
         <activity
             android:exported="true"
+            android:launchMode="singleTop"
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

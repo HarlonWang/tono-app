@@ -65,11 +65,14 @@
     <string name="paywall_checkout_failed">Couldn't start the subscription right now. Please try again.</string>
     <string name="paywall_ios_refund_note">Cancel anytime in Settings. Refunds are handled by Apple.</string>
     <string name="paywall_ios_disclosure">Payment will be charged to your Apple Account at confirmation of purchase. Your subscription renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel anytime in Settings &gt; Apple Account &gt; Subscriptions.</string>
-    <string name="paywall_ios_restore">Restore Purchases</string>
-    <string name="paywall_ios_restore_none">No subscription to restore.</string>
-    <string name="paywall_ios_restore_done">Your Pro subscription has been restored.</string>
-    <string name="paywall_ios_purchase_failed">The purchase didn't go through. Please try again.</string>
+    <string name="paywall_store_restore">Restore Purchases</string>
+    <string name="paywall_store_restore_none">No subscription to restore.</string>
+    <string name="paywall_store_restore_done">Your Pro subscription has been restored.</string>
+    <string name="paywall_store_purchase_failed">The purchase didn't go through. Please try again.</string>
     <string name="paywall_ios_pro_via_web">Your Pro subscription from the web works on iOS too.</string>
-    <string name="paywall_ios_privacy">Privacy Policy</string>
-    <string name="paywall_ios_terms">Terms of Use</string>
+    <string name="paywall_play_refund_note">Cancel anytime in Google Play. Refunds are handled by Google Play.</string>
+    <string name="paywall_play_disclosure">Payment will be charged to your Google Play account at confirmation of purchase. Your subscription renews automatically unless cancelled before the end of the current period. Manage or cancel anytime in Google Play &gt; Payments &amp; subscriptions &gt; Subscriptions.</string>
+    <string name="paywall_play_pro_via_web">Your Pro subscription from the web works on this device too.</string>
+    <string name="paywall_store_privacy">Privacy Policy</string>
+    <string name="paywall_store_terms">Terms of Use</string>
 </resources>

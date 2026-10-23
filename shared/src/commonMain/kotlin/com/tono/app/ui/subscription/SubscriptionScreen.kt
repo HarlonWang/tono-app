@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import com.tono.app.auth.AuthState
 import com.tono.app.auth.globalAuthManager
 import com.tono.app.core.ProCheckout
-import com.tono.app.core.billing.APP_STORE_MANAGE_URL
-import com.tono.app.core.billing.AppStoreBilling
-import com.tono.app.core.billing.AppStorePlan
-import com.tono.app.core.billing.AppStorePurchaseResult
+import com.tono.app.core.billing.StoreBilling
+import com.tono.app.core.billing.StorePlan
+import com.tono.app.core.billing.StorePurchaseResult
+import com.tono.app.core.platform.isIosPlatform
 import com.tono.app.core.platform.openInSystemBrowser
 import com.tono.app.core.platform.requestLanguage
 import com.tono.app.data.local.globalSettingsManager
@@ -64,14 +64,17 @@ import com.tono.app.resources.paywall_benefit_search
 import com.tono.app.resources.paywall_benefit_voice
 import com.tono.app.resources.paywall_checkout_failed
 import com.tono.app.resources.paywall_ios_disclosure
-import com.tono.app.resources.paywall_ios_privacy
 import com.tono.app.resources.paywall_ios_pro_via_web
-import com.tono.app.resources.paywall_ios_purchase_failed
 import com.tono.app.resources.paywall_ios_refund_note
-import com.tono.app.resources.paywall_ios_restore
-import com.tono.app.resources.paywall_ios_restore_done
-import com.tono.app.resources.paywall_ios_restore_none
-import com.tono.app.resources.paywall_ios_terms
+import com.tono.app.resources.paywall_play_disclosure
+import com.tono.app.resources.paywall_play_pro_via_web
+import com.tono.app.resources.paywall_play_refund_note
+import com.tono.app.resources.paywall_store_privacy
+import com.tono.app.resources.paywall_store_purchase_failed
+import com.tono.app.resources.paywall_store_restore
+import com.tono.app.resources.paywall_store_restore_done
+import com.tono.app.resources.paywall_store_restore_none
+import com.tono.app.resources.paywall_store_terms
 import com.tono.app.resources.settings_manage_subscription
 import com.tono.app.resources.paywall_cta_sign_in
 import com.tono.app.resources.paywall_cta_subscribe
@@ -91,9 +94,10 @@ private const val SOURCE_PAYWALL = "paywall"
 
 /**
  * 订阅页。文案以 /api/app-config 的 pro_paywall 为准，本地 strings 只是从未拉到配置时的兜底。
- * Android：价格来自 /api/billing/prices，下单经 /api/billing/checkout 拿 Paddle 收银台链接后外跳浏览器。
- * iOS：只走 App Store（[AppStoreBilling]），价格取 StoreKit 本地化价，文案换成 pro_paywall.app_store，
- * 不出现任何 Paddle 价格或链接（3.1.1）；Pro 仍以服务端 webhook 落库后的 /api/me 为准。
+ * 商店构建（iOS、Android Play 渠道）：只走商店结算（[StoreBilling]），价格取商店本地化价，文案换成
+ * pro_paywall.app_store / play_store，不出现任何 Paddle 价格或链接（App Store 3.1.1、Play 付款政策第 4 条）。
+ * 其他构建（GitHub / F-Droid）：价格来自 /api/billing/prices，下单经 /api/billing/checkout 拿 Paddle 收银台链接后外跳浏览器。
+ * Pro 一律以服务端 webhook 落库后的 /api/me 为准。
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -106,11 +110,12 @@ fun SubscriptionScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val billing = remember { BillingRepository() }
     val userRepository = remember { UserRepository() }
-    val appStore = AppStoreBilling.available
-    val store = paywall?.appStore
+    val storeBilling = StoreBilling.available
+    val ios = remember { isIosPlatform() }
+    val store = if (ios) paywall?.appStore else paywall?.playStore
 
     var prices by remember { mutableStateOf<PricesResponse?>(null) }
-    var storePlans by remember { mutableStateOf<List<AppStorePlan>?>(null) }
+    var storePlans by remember { mutableStateOf<List<StorePlan>?>(null) }
     var pricesLoaded by remember { mutableStateOf(false) }
     var plan by remember { mutableStateOf("annual") }
     var busy by remember { mutableStateOf(false) }
@@ -119,19 +124,19 @@ fun SubscriptionScreen(onBack: () -> Unit) {
     var proSource by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        if (appStore) storePlans = AppStoreBilling.loadPlans() else prices = billing.fetchPrices()
+        if (storeBilling) storePlans = StoreBilling.loadPlans() else prices = billing.fetchPrices()
         pricesLoaded = true
     }
     LaunchedEffect(isPro) {
-        if (appStore && isPro) proSource = billing.fetchSubscriptionSource()
+        if (isPro) proSource = billing.fetchSubscriptionSource()
     }
 
     val checkoutFailed = paywall?.checkoutFailed?.forLang(lang) ?: stringResource(Res.string.paywall_checkout_failed)
-    val purchaseFailed = store?.purchaseFailed?.forLang(lang) ?: stringResource(Res.string.paywall_ios_purchase_failed)
-    val restoreNone = store?.restoreNone?.forLang(lang) ?: stringResource(Res.string.paywall_ios_restore_none)
-    val restoreDone = store?.restoreDone?.forLang(lang) ?: stringResource(Res.string.paywall_ios_restore_done)
+    val purchaseFailed = store?.purchaseFailed?.forLang(lang) ?: stringResource(Res.string.paywall_store_purchase_failed)
+    val restoreNone = store?.restoreNone?.forLang(lang) ?: stringResource(Res.string.paywall_store_restore_none)
+    val restoreDone = store?.restoreDone?.forLang(lang) ?: stringResource(Res.string.paywall_store_restore_done)
 
-    val options: List<PlanOption>? = if (appStore) {
+    val options: List<PlanOption>? = if (storeBilling) {
         storePlans?.let { plans ->
             val annual = plans.first { it.plan == "annual" }
             val monthly = plans.first { it.plan == "monthly" }
@@ -163,14 +168,14 @@ fun SubscriptionScreen(onBack: () -> Unit) {
         notice = null
         busy = true
         scope.launch {
-            if (appStore) {
-                when (AppStoreBilling.purchase(plan)) {
-                    AppStorePurchaseResult.Success -> {
+            if (storeBilling) {
+                when (StoreBilling.purchase(plan)) {
+                    StorePurchaseResult.Success -> {
                         ProCheckout.markOpened(plan)
                         awaitPro()
                     }
-                    AppStorePurchaseResult.Cancelled -> Unit
-                    AppStorePurchaseResult.Failed -> error = purchaseFailed
+                    StorePurchaseResult.Cancelled -> Unit
+                    StorePurchaseResult.Failed -> error = purchaseFailed
                 }
             } else {
                 val checkout = billing.createCheckout(plan)
@@ -191,7 +196,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
         notice = null
         busy = true
         scope.launch {
-            when (AppStoreBilling.restore()) {
+            when (StoreBilling.restore()) {
                 true -> {
                     awaitPro()
                     notice = restoreDone
@@ -256,14 +261,16 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                // iOS：App Store 来源可跳系统订阅管理；Paddle 来源只告知，不放任何外链
-                if (appStore && proSource == "apple") {
-                    OutlinedButton(onClick = { openInSystemBrowser(APP_STORE_MANAGE_URL) }, modifier = Modifier.fillMaxWidth()) {
+                // 商店来源可跳各自系统的订阅管理；Paddle 来源在商店构建里只告知，不放任何外链
+                val manageUrl = StoreBilling.manageUrlOf(proSource)
+                if (manageUrl != null) {
+                    OutlinedButton(onClick = { openInSystemBrowser(manageUrl) }, modifier = Modifier.fillMaxWidth()) {
                         Text(store?.manage?.forLang(lang) ?: stringResource(Res.string.settings_manage_subscription))
                     }
-                } else if (appStore && proSource == "paddle") {
+                } else if (storeBilling && proSource == "paddle") {
                     Text(
-                        text = store?.proViaWeb?.forLang(lang) ?: stringResource(Res.string.paywall_ios_pro_via_web),
+                        text = store?.proViaWeb?.forLang(lang)
+                            ?: stringResource(if (ios) Res.string.paywall_ios_pro_via_web else Res.string.paywall_play_pro_via_web),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -306,13 +313,15 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                     )
                 }
             }
-            if (appStore) {
+            if (storeBilling) {
                 TextButton(onClick = { restore() }, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text(store?.restore?.forLang(lang) ?: stringResource(Res.string.paywall_ios_restore))
+                    Text(store?.restore?.forLang(lang) ?: stringResource(Res.string.paywall_store_restore))
                 }
-                AppStoreFooter(
-                    refundNote = store?.refundNote?.forLang(lang) ?: stringResource(Res.string.paywall_ios_refund_note),
-                    disclosure = store?.disclosure?.forLang(lang) ?: stringResource(Res.string.paywall_ios_disclosure),
+                StoreFooter(
+                    refundNote = store?.refundNote?.forLang(lang)
+                        ?: stringResource(if (ios) Res.string.paywall_ios_refund_note else Res.string.paywall_play_refund_note),
+                    disclosure = store?.disclosure?.forLang(lang)
+                        ?: stringResource(if (ios) Res.string.paywall_ios_disclosure else Res.string.paywall_play_disclosure),
                 )
             } else {
                 Text(
@@ -328,15 +337,15 @@ fun SubscriptionScreen(onBack: () -> Unit) {
 
 private data class PlanOption(val plan: String, val price: String, val savingsPercent: Int?)
 
-/** 3.1.2 要求：自动续费说明 + 隐私政策与使用条款（EULA）链接，紧贴购买按钮下方。 */
+/** App Store 3.1.2 要求（Play 同样照做）：自动续费说明 + 隐私政策与使用条款（EULA）链接，紧贴购买按钮下方。 */
 @Composable
-private fun AppStoreFooter(refundNote: String, disclosure: String) {
+private fun StoreFooter(refundNote: String, disclosure: String) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(refundNote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(disclosure, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { openInSystemBrowser(PRIVACY_URL) }) { Text(stringResource(Res.string.paywall_ios_privacy)) }
-            TextButton(onClick = { openInSystemBrowser(TERMS_URL) }) { Text(stringResource(Res.string.paywall_ios_terms)) }
+            TextButton(onClick = { openInSystemBrowser(PRIVACY_URL) }) { Text(stringResource(Res.string.paywall_store_privacy)) }
+            TextButton(onClick = { openInSystemBrowser(TERMS_URL) }) { Text(stringResource(Res.string.paywall_store_terms)) }
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.tono.app.data.remote
 
 import com.tono.app.core.analytics.setAnalyticsUser
-import com.tono.app.core.billing.AppStoreBilling
+import com.tono.app.core.billing.StoreBilling
 import com.tono.app.data.local.globalSettingsManager
 import com.tono.app.data.model.AppConfigResponse
 import com.tono.app.data.model.CheckoutResponse
@@ -21,7 +21,7 @@ class UserRepository(private val api: TonoApi = TonoApi()) {
         globalSettingsManager.setUserEmail(me.user.email)
         globalSettingsManager.setIsPro(me.pro)
         setAnalyticsUser(me.user.userId)
-        AppStoreBilling.identify(me.user.userId)
+        StoreBilling.identify(me.user.userId)
         me.user
     } catch (e: CancellationException) {
         throw e
@@ -47,7 +47,7 @@ class BillingRepository(private val api: TonoApi = TonoApi()) {
         null
     }
 
-    /** 生效中 Pro 的来源："apple" / "paddle"，无订阅或拉取失败为 null。 */
+    /** 生效中 Pro 的来源："apple" / "google" / "paddle"，无订阅或拉取失败为 null。 */
     suspend fun fetchSubscriptionSource(): String? = try {
         api.fetchSubscription().source
     } catch (e: CancellationException) {

@@ -65,11 +65,14 @@
     <string name="paywall_checkout_failed">暂时无法发起订阅，请稍后再试</string>
     <string name="paywall_ios_refund_note">可随时在系统设置中取消，退款由 Apple 处理。</string>
     <string name="paywall_ios_disclosure">确认购买后将通过你的 Apple 账户扣款。订阅会自动续期，除非在当前周期结束前至少 24 小时关闭自动续订。可随时在「设置 &gt; Apple 账户 &gt; 订阅」中管理或取消。</string>
-    <string name="paywall_ios_restore">恢复购买</string>
-    <string name="paywall_ios_restore_none">没有找到可恢复的订阅</string>
-    <string name="paywall_ios_restore_done">已恢复你的 Pro 订阅</string>
-    <string name="paywall_ios_purchase_failed">购买未完成，请稍后再试</string>
+    <string name="paywall_store_restore">恢复购买</string>
+    <string name="paywall_store_restore_none">没有找到可恢复的订阅</string>
+    <string name="paywall_store_restore_done">已恢复你的 Pro 订阅</string>
+    <string name="paywall_store_purchase_failed">购买未完成，请稍后再试</string>
     <string name="paywall_ios_pro_via_web">你的 Pro 订阅来自网页，在 iOS 上同样有效</string>
-    <string name="paywall_ios_privacy">隐私政策</string>
-    <string name="paywall_ios_terms">使用条款</string>
+    <string name="paywall_play_refund_note">可随时在 Google Play 中取消，退款由 Google Play 处理。</string>
+    <string name="paywall_play_disclosure">确认购买后将通过你的 Google Play 账号扣款。订阅会自动续期，除非在当前周期结束前取消。可随时在 Google Play 的「付款和订阅 &gt; 订阅」中管理或取消。</string>
+    <string name="paywall_play_pro_via_web">你的 Pro 订阅来自网页，在本设备上同样有效</string>
+    <string name="paywall_store_privacy">隐私政策</string>
+    <string name="paywall_store_terms">使用条款</string>
 </resources>

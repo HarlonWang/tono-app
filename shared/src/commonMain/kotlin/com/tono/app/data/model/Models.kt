@@ -72,12 +72,13 @@ data class ProPaywallRemoteConfig(
     @SerialName("refund_note") val refundNote: LocalizedText? = null,
     @SerialName("already_pro") val alreadyPro: LocalizedText? = null,
     @SerialName("checkout_failed") val checkoutFailed: LocalizedText? = null,
-    /** iOS 专用替换字段（App Store 审核口径），Android 不读 */
-    @SerialName("app_store") val appStore: AppStorePaywallRemoteConfig? = null,
+    /** 商店结算专用替换字段：iOS 读 app_store（App Store 审核口径），Android Play 渠道读 play_store */
+    @SerialName("app_store") val appStore: StorePaywallRemoteConfig? = null,
+    @SerialName("play_store") val playStore: StorePaywallRemoteConfig? = null,
 )
 
 @Serializable
-data class AppStorePaywallRemoteConfig(
+data class StorePaywallRemoteConfig(
     @SerialName("refund_note") val refundNote: LocalizedText? = null,
     val disclosure: LocalizedText? = null,
     val restore: LocalizedText? = null,
