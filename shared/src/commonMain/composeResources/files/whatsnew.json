@@ -1,13 +1,15 @@
 {
-  "version": "0.7.0",
+  "version": "0.8.0",
   "zh": [
-    "新增删除账号：在设置中通过邮箱验证码永久删除账号",
-    "新增外观设置，可选择浅色、深色或跟随系统",
-    "稳定性与体验优化"
+    "Pro 订阅改为应用商店内购买（Google Play / App Store），支付与管理更方便",
+    "回答中的数学公式现在会正确渲染",
+    "设置新增「举报内容」入口",
+    "流式回复显示更稳定，不再闪动或半截显示"
   ],
   "en": [
-    "Delete your account from Settings, confirmed with an email code",
-    "New Appearance setting: light, dark, or follow system",
-    "Stability and experience improvements"
+    "Pro subscriptions now use in-app purchase (Google Play / App Store) for easier payment and management",
+    "Math formulas in answers are now rendered properly",
+    "New Report Content entry in Settings",
+    "Smoother streaming replies with no flicker or half-rendered text"
   ]
 }
