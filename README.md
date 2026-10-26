@@ -1,6 +1,6 @@
 # tono-app
 
-Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。产品定义见 `~/TonoChatProjects/product-design.md`。
+Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。产品定义见仓库 `HarlonWang/TonoChatProjects` 的 `product-design.md`。
 
 ## 模块
 
@@ -34,3 +34,7 @@ Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。
 App 升级后首启弹一次「新版本更新说明」，内容来自 `shared/src/commonMain/composeResources/files/whatsnew.json`（随包打进去）。**只走手写，不用 AI 自动生成**：发版前把本版内容写进去，`version` 必须等于 tag。同一份内容还拼成 GitHub Release 正文，并生成 Play 本版发版说明 `fastlane/metadata/android/<locale>/changelogs/<versionCode>.txt`（仓库里已有该文件则沿用）。
 
 CI 的 Check What's New 步骤校验 `version` 与 tag 一致且有内容：正式版不符直接失败，预发布只警告（本版不弹窗）。首次安装不弹；内置文件版本与 App 版本不一致（dev 构建、占位文件）也不弹。写法见 `CLAUDE.md`「写更新说明」。
+
+## 许可证
+
+代码以 [MIT](LICENSE) 许可证开源。「Tono」名称、Logo、图标与 `tonote.app` 域名是品牌资产，不随代码授权；基于本仓库分发的应用请换用自己的名称、图标、包名与服务端地址。
