@@ -27,7 +27,14 @@ Tono 客户端：Android + iOS，Kotlin Multiplatform + Compose Multiplatform。
 
 **打 tag 前必须跑 `scripts/release-smoke.sh` 并看到 PASS。** 它先查线上服务端（模型目录 default 契约、订阅价格、app-config）与官网外链，再构建 play 渠道 release 包（R8 minify 与线上一致）装到设备上，验证启动、聊天输入框、设置页不崩。debug 包不混淆，R8 裁剪类问题只有 release 包能暴露。不发聊天消息、不耗额度。
 
-推 tag 触发 `.github/workflows/release.yml`：构建 github 渠道 APK 与 play 渠道 AAB，建 GitHub Release。需要 secrets：`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`（旧 Tono 的签名密钥，Play 更新必须同一把）。
+推 tag 触发 `.github/workflows/release.yml`：构建 github 渠道 APK 与 play 渠道 AAB，建 GitHub Release，AAB 上 Play 正式轨道；随后 `build-ios` job 在 macOS runner 上 archive、云签名并直传 App Store Connect（进 TestFlight，提审仍在 ASC 手动选 build）。需要 secrets：
+
+- Android：`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`（旧 Tono 的签名密钥，Play 更新必须同一把）、`PLAY_SERVICE_ACCOUNT_JSON`
+- iOS：`ASC_KEY_ID`、`ASC_ISSUER_ID`、`ASC_KEY_P8`（App Store Connect API 团队密钥，Admin 角色；云签名靠它自建证书与描述文件，仓库不存 .p12）
+
+两端版本同源：版本名 = tag，构建号 = versionCode（Android 公式算出，经 job output 传给 iOS 当 `CFBundleVersion`）。iOS 的版本由 xcodebuild 参数注入，`iosApp/Configuration/Config.xcconfig` 里的值只是本机开发占位。同一 tag 重传任一端都会撞构建号，打补丁 tag 解决。预发布 tag（带 `-`）只出 Android 产物，不上 Play、不跑 iOS。
+
+手动验证：Actions 里 `workflow_dispatch`，`version_name` 填版本，`play_track=internal` 传 Play 内部测试，`ios=testflight` 走一遍 iOS 到 TestFlight。
 
 ### 版本更新说明（whatsnew）
 

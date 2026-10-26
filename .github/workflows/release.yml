@@ -15,6 +15,11 @@ on:
         type: choice
         options: [none, internal]
         default: none
+      ios:
+        description: "iOS：none 不构建；testflight 构建、云签名并上传 TestFlight（用 version_name 作版本，构建号同 versionCode）"
+        type: choice
+        options: [none, testflight]
+        default: none
 
 permissions:
   contents: write
@@ -22,6 +27,8 @@ permissions:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    outputs:
+      version_code: ${{ steps.vcode.outputs.value }}
     env:
       # App 内置更新说明（手写）：GitHub Release 正文与 Play 发版说明也从它生成
       WHATSNEW_PATH: shared/src/commonMain/composeResources/files/whatsnew.json
@@ -86,6 +93,16 @@ jobs:
           cp androidApp/build/outputs/apk/github/release/androidApp-github-release.apk Tono-${VERSION_NAME}.apk
           cp androidApp/build/outputs/bundle/playRelease/androidApp-play-release.aab Tono-${VERSION_NAME}-play.aab
 
+      # versionCode 从构建产物读，公式只在 build.gradle.kts 一处维护；iOS job 拿它当 CFBundleVersion，两端构建号同源
+      - name: Read versionCode
+        id: vcode
+        run: |
+          AAPT=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name aapt | sort -V | tail -n 1)
+          VCODE=$("$AAPT" dump badging Tono-${VERSION_NAME}.apk | grep '^package:' | sed -n "s/.* versionCode='\([0-9]*\)'.*/\1/p")
+          [ -n "$VCODE" ] || { echo "❌ 读不到 versionCode"; exit 1; }
+          echo "value=$VCODE" >> "$GITHUB_OUTPUT"
+          echo "versionCode=$VCODE"
+
       # Release 正文与 App 内更新说明同源；预发布没写 whatsnew 时退回 GitHub 自动生成
       - name: GitHub Release
         if: github.event_name == 'push'
@@ -134,10 +151,7 @@ jobs:
           SUPPLY_JSON_KEY_DATA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
           # 本版 Play 发版说明：仓库里已有 changelogs/<versionCode>.txt 就沿用，否则由 whatsnew.json 生成。
-          # versionCode 从构建产物读，公式只在 build.gradle.kts 一处维护
-          AAPT=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name aapt | sort -V | tail -n 1)
-          VCODE=$("$AAPT" dump badging Tono-${VERSION_NAME}.apk | grep '^package:' | sed -n "s/.* versionCode='\([0-9]*\)'.*/\1/p")
-          [ -n "$VCODE" ] || { echo "❌ 读不到 versionCode"; exit 1; }
+          VCODE="${{ steps.vcode.outputs.value }}"
           python3 - "$VCODE" <<'EOF'
           import json, os, sys
           vcode = sys.argv[1]
@@ -193,3 +207,103 @@ jobs:
             --skip_upload_changelogs true \
             --skip_upload_images true \
             --skip_upload_screenshots true
+
+  # iOS：正式 tag 自动跑，workflow_dispatch 选 ios=testflight 手动验证。预发布 tag（带 -）不跑：构建号公式会去掉后缀，与正式版撞号。
+  # 版本注入：MARKETING_VERSION（CFBundleShortVersionString）= tag 去掉后缀，CURRENT_PROJECT_VERSION（CFBundleVersion）= Android versionCode，
+  # 命令行参数优先级高于 Config.xcconfig，工程文件不动。同一 tag 重传会撞构建号，处理同 Android：打补丁 tag。
+  # 签名：Xcode 云签名。-allowProvisioningUpdates + ASC API key（Admin）让 xcodebuild 自建证书与描述文件，不存 .p12、不用 match。
+  # 上传：exportArchive 的 destination=upload 直传 App Store Connect，进 TestFlight 后仍手动在 ASC 选 build 提审。
+  build-ios:
+    if: ${{ !cancelled() && needs.build-android.result == 'success' && ((github.event_name == 'push' && !contains(github.ref_name, '-')) || github.event.inputs.ios == 'testflight') }}
+    needs: build-android
+    runs-on: macos-latest
+    timeout-minutes: 90
+    env:
+      TEAM_ID: TP3A22B9WT
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # Kotlin/Native 编译器与平台库约 1GB，不缓存每次冷下载十分钟起
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: ${{ runner.os }}-konan-
+
+      - name: Prepare version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION_NAME="${{ github.ref_name }}"
+          else
+            VERSION_NAME="${{ github.event.inputs.version_name || '0.0.1-ci' }}"
+          fi
+          VCODE="${{ needs.build-android.outputs.version_code }}"
+          [ -n "$VCODE" ] || { echo "❌ Android job 没给出 versionCode"; exit 1; }
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "MARKETING_VERSION=${VERSION_NAME%%-*}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$VCODE" >> $GITHUB_ENV
+          echo "iOS $VERSION_NAME → CFBundleShortVersionString=${VERSION_NAME%%-*} CFBundleVersion=$VCODE"
+
+      - name: Install ASC API key
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          printf '%s\n' "${{ secrets.ASC_KEY_P8 }}" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          echo "ASC_KEY_PATH=$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" >> $GITHUB_ENV
+
+      - name: Archive
+        run: |
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Tono.xcarchive" \
+            -derivedDataPath "$RUNNER_TEMP/ios-build" \
+            MARKETING_VERSION="$MARKETING_VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            archive | tee "$RUNNER_TEMP/archive.log" | grep -E '^(\*\*|error|warning: .*sign|.*error:)' || true
+          test -d "$RUNNER_TEMP/Tono.xcarchive" || { echo "❌ archive 失败，日志尾部："; tail -n 80 "$RUNNER_TEMP/archive.log"; exit 1; }
+
+      - name: Upload to App Store Connect
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Tono.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "✅ iOS $MARKETING_VERSION ($BUILD_NUMBER) 已上传 App Store Connect，处理完成后出现在 TestFlight"
+
+      - name: Upload archive log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-archive-log
+          path: ${{ runner.temp }}/archive.log
