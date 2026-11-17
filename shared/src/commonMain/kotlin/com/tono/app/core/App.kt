@@ -35,6 +35,7 @@ import com.tono.app.resources.chat_suggest_what_can_you_do
 import com.tono.app.resources.chat_suggest_what_can_you_do_prompt
 import com.tono.app.resources.settings_title
 import com.tono.app.ui.auth.LoginSheetHost
+import com.tono.app.ui.consent.AiDataConsentScreen
 import com.tono.app.ui.settings.SettingsScreen
 import com.tono.app.ui.subscription.SubscriptionScreen
 import kotlinx.coroutines.launch
@@ -124,7 +125,14 @@ fun App() {
                 entryProvider = { key ->
                     when (key) {
                         is Chat -> NavEntry(key) {
-                            ChatScreen(
+                            val consented by globalSettingsManager.aiDataConsented
+                                .collectAsState(globalSettingsManager.currentAiDataConsented())
+                            if (!consented) {
+                                AiDataConsentScreen(
+                                    onAgree = { globalSettingsManager.acceptAiDataConsent() },
+                                    onOpenSettings = { backStack.add(Settings) },
+                                )
+                            } else ChatScreen(
                                 onBack = {},
                                 navigationIcon = {
                                     IconButton(onClick = { backStack.add(Settings) }) {

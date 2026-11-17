@@ -3,8 +3,10 @@ package com.tono.app.data.local
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.getBooleanFlow
+import com.russhwolf.settings.coroutines.getIntFlow
 import com.russhwolf.settings.coroutines.getStringFlow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import wang.harlon.chatbase.model.FOLLOW_SERVER_DEFAULT
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -17,6 +19,10 @@ private const val CHAT_IMAGES_MAX_KEY = "prefs_chat_images_max"
 private const val CHAT_IMAGES_PER_KB_KEY = "prefs_chat_images_per_kb"
 private const val CHAT_VOICE_MAX_MS_KEY = "prefs_chat_voice_max_ms"
 private const val CHECKOUT_OPENED_AT_KEY = "prefs_checkout_opened_at"
+private const val AI_DATA_CONSENT_KEY = "prefs_ai_data_consent_version"
+
+/** 同意页所述的数据范围或 AI 提供方有变时递增，已同意的用户会被重新征求同意。 */
+const val AI_DATA_CONSENT_VERSION = 1
 
 class SettingsManager(private val settings: ObservableSettings) {
 
@@ -60,7 +66,11 @@ class SettingsManager(private val settings: ObservableSettings) {
     fun setCheckoutOpenedAt(epochMillis: Long) = settings.putLong(CHECKOUT_OPENED_AT_KEY, epochMillis)
     fun clearCheckoutOpenedAt() = settings.remove(CHECKOUT_OPENED_AT_KEY)
 
-    /** 上次弹过（或首装时静默记下）更新说明的版本；null 表示首次安装。 */
+    /** 用户是否已同意把消息发给第三方 AI 提供方；未同意前不渲染 chat。 */
+    val aiDataConsented: Flow<Boolean> =
+        settings.getIntFlow(AI_DATA_CONSENT_KEY, 0).map { it >= AI_DATA_CONSENT_VERSION }
+    fun currentAiDataConsented(): Boolean = settings.getInt(AI_DATA_CONSENT_KEY, 0) >= AI_DATA_CONSENT_VERSION
+    fun acceptAiDataConsent() = settings.putInt(AI_DATA_CONSENT_KEY, AI_DATA_CONSENT_VERSION)
 }
 
 val globalSettings: ObservableSettings by lazy { Settings() as ObservableSettings }

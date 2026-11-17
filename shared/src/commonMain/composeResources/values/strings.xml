@@ -75,4 +75,16 @@
     <string name="paywall_play_pro_via_web">Your Pro subscription from the web works on this device too.</string>
     <string name="paywall_store_privacy">Privacy Policy</string>
     <string name="paywall_store_terms">Terms of Use</string>
+
+    <string name="consent_title">Before you start</string>
+    <string name="consent_intro">Tono answers you with AI models run by other companies. To do that, it has to share what you send with them.</string>
+    <string name="consent_what_title">What is sent</string>
+    <string name="consent_what_body">The messages you send, any images you attach and any voice recordings you make, along with recent turns of the conversation for context.</string>
+    <string name="consent_who_title">Who receives it</string>
+    <string name="consent_who_body">Your request goes through Tono's server to the provider of the model you use: Zhipu AI (China) or OpenAI (United States). Voice recordings are transcribed by OpenAI.</string>
+    <string name="consent_use_title">How it is used</string>
+    <string name="consent_use_body">Only to generate your replies. Tono doesn't sell your data or use your conversations to train models.</string>
+    <string name="consent_privacy_link">Read the Privacy Policy</string>
+    <string name="consent_agree">Agree and continue</string>
+    <string name="consent_decline_note">If you don't agree, nothing is sent and chat stays unavailable.</string>
 </resources>

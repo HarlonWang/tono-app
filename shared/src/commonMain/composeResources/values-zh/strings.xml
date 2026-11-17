@@ -75,4 +75,16 @@
     <string name="paywall_play_pro_via_web">你的 Pro 订阅来自网页，在本设备上同样有效</string>
     <string name="paywall_store_privacy">隐私政策</string>
     <string name="paywall_store_terms">使用条款</string>
+
+    <string name="consent_title">开始之前</string>
+    <string name="consent_intro">Tono 使用其他公司提供的 AI 模型为你生成回答，因此需要把你发送的内容共享给它们。</string>
+    <string name="consent_what_title">发送哪些数据</string>
+    <string name="consent_what_body">你发送的消息、附带的图片和录制的语音，以及用作上下文的最近几轮对话。</string>
+    <string name="consent_who_title">发送给谁</string>
+    <string name="consent_who_body">请求经 Tono 服务器转发给你所用模型的提供方：智谱 AI（中国）或 OpenAI（美国）。语音由 OpenAI 转写为文字。</string>
+    <string name="consent_use_title">如何使用</string>
+    <string name="consent_use_body">仅用于生成给你的回答。Tono 不出售你的数据，也不用你的对话训练模型。</string>
+    <string name="consent_privacy_link">查看隐私政策</string>
+    <string name="consent_agree">同意并继续</string>
+    <string name="consent_decline_note">如不同意，不会发送任何数据，聊天功能将无法使用。</string>
 </resources>
