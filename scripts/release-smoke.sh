@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 发布前冒烟：先查线上服务端与官网（客户端写死的接口和外链），再构建 play 渠道 release 包（R8 minify 与线上一致），
-# 装设备验证启动、聊天输入框渲染、进设置页不崩。打 tag 前必须跑一次并看到 PASS。用法：scripts/release-smoke.sh
+# 装设备验证启动、同意页、聊天输入框渲染、进设置页不崩。打 tag 前必须跑一次并看到 PASS。用法：scripts/release-smoke.sh
 # 不发任何聊天消息，不消耗额度。
 # 设备：ANDROID_SERIAL 指定的那台；否则唯一在线的设备；都没有时启动 SMOKE_AVD，
 # 未设 SMOKE_AVD 且本机只有一个 AVD 就启动它。多台在线或多个 AVD 时不猜，报错列出供选。
@@ -127,6 +127,23 @@ adb -s "$serial" logcat -c
 adb -s "$serial" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
 sleep 10
 check_alive "启动冒烟"
+
+# 首次启动先出 AI 数据共享同意页（App Store 5.1.1(i)）：同意前不该有输入框，点同意后才进聊天页
+if ! has_edit_text; then
+  agree=$(adb -s "$serial" shell cat /sdcard/smoke_ui.xml 2>/dev/null | python3 -c '
+import re, sys
+m = re.search(r"text=\"(?:Agree and continue|同意并继续)\"[^>]*bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]\"", sys.stdin.read())
+if m:
+    x1, y1, x2, y2 = map(int, m.groups())
+    print((x1 + x2) // 2, (y1 + y2) // 2)
+')
+  [ -n "$agree" ] || fail "首页既没有输入框也没有同意页的同意按钮"
+  echo "  ok: 同意页已渲染，同意前无输入框"
+  # shellcheck disable=SC2086
+  adb -s "$serial" shell input tap $agree
+  sleep 3
+  check_alive "同意后进入聊天页"
+fi
 
 # 首页就是聊天页：material3 与 CMP 版本脱节时，编译、单测、启动全绿，渲染输入框即 AbstractMethodError
 has_edit_text || fail "首页没有输入框——聊天页没渲染出来"
