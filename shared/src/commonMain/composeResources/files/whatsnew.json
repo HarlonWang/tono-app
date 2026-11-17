@@ -1,15 +1,9 @@
 {
-  "version": "0.8.0",
+  "version": "0.8.1",
   "zh": [
-    "Pro 订阅改为应用商店内购买（Google Play / App Store），支付与管理更方便",
-    "回答中的数学公式现在会正确渲染",
-    "设置新增「举报内容」入口",
-    "流式回复显示更稳定，不再闪动或半截显示"
+    "首次使用前新增数据使用说明：列明哪些内容会发送给 AI 模型提供方，同意后再开始聊天"
   ],
   "en": [
-    "Pro subscriptions now use in-app purchase (Google Play / App Store) for easier payment and management",
-    "Math formulas in answers are now rendered properly",
-    "New Report Content entry in Settings",
-    "Smoother streaming replies with no flicker or half-rendered text"
+    "New data-use notice on first launch: see what is shared with AI model providers and agree before you start chatting"
   ]
 }
